@@ -299,13 +299,14 @@
 
 /* Collection sections */
 .collection-section {
-  border-top: 0.5px solid rgba(0,0,0,0.08);
+  border-top: 0.5px solid rgba(0,0,0,0.06);
 }
 
-.collection-section:nth-child(odd) {
-  background: #faf8f5;
+/* Smooth scroll snap for full-page feel */
+html {
+  scroll-snap-type: y proximity;
 }
 
-.collection-section:nth-child(even) {
-  background: #fff;
+.collection-section {
+  scroll-snap-align: start;
 }

@@ -1,15 +1,17 @@
 /**
  * Home — Lotius
- * Design: Smooth scroll-driven experience (no Enter gate)
- * - Hero section with auto-rotating finalists + large background text
- * - Spring / Summer / Fall collection sections as 3D carousels
- *   with large typographic text layered behind AND in front of images
- * - Fixed smooth scrolling motion throughout
+ * Design: Smooth scroll-driven experience with seasonal atmospheric transitions
+ * - Hero section with auto-rotating finalists in 3D perspective
+ * - Spring / Summer / Fall collections with 3D carousels (5 images each)
+ * - Seasonal particle effects: sakura petals, fireflies, autumn leaves
+ * - Background color transitions to match each season
+ * - About Me section with Instagram link
  */
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "wouter";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import SeasonalParticles from "@/components/SeasonalParticles";
 
 /* ─── Data ─── */
 const finalists = [
@@ -41,30 +43,51 @@ const finalists = [
 
 const collections = [
   {
-    season: "SPRING",
+    season: "SPRING" as const,
+    seasonKey: "spring" as const,
     year: "2026",
     subtitle: "Ephemeral Bloom",
+    bgColor: "#fef7f0",
+    textColor: "rgba(180, 100, 120, 0.08)",
+    subtitleColor: "rgba(180, 100, 120, 0.45)",
     images: [
       "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_spring_1-ijPg7iU3QnhdEjyMcixuwD.webp",
       "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_spring_2-jxukn5mApUGppWXkTvYsuM.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_spring_3-TnXvW4TzCfV3bPxbbndqcZ.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_spring_4-ayiTF3tAtMPHAtQLv2Tdvy.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_spring_5-b39mxzW8yUpbdN6GTJ4RaS.webp",
     ],
   },
   {
-    season: "SUMMER",
+    season: "SUMMER" as const,
+    seasonKey: "summer" as const,
     year: "2026",
     subtitle: "Azure Meridian",
+    bgColor: "#f0f7fd",
+    textColor: "rgba(30, 100, 180, 0.06)",
+    subtitleColor: "rgba(30, 100, 180, 0.4)",
     images: [
       "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_summer_1-44dMeJXFkLUfeJM7U3FCrc.webp",
       "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_summer_2-362jnR6ddyKSU6G5SKpZHr.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_summer_3-gqbVoUg3poLi7cxkaBSW9K.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_summer_4-BaqcLXvXDhvBvJWUiMMsQ8.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_summer_5-eDYW4jyJaDP9BX8NDvUpro.webp",
     ],
   },
   {
-    season: "FALL",
+    season: "FALL" as const,
+    seasonKey: "fall" as const,
     year: "2026",
     subtitle: "Amber Reverie",
+    bgColor: "#faf3eb",
+    textColor: "rgba(139, 69, 19, 0.06)",
+    subtitleColor: "rgba(139, 69, 19, 0.45)",
     images: [
       "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_fall_1-StcMkgsqPMudxk9GEgzvW4.webp",
       "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_fall_2-egqQEdUWRTBzfrpxJJXWeT.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_fall_3-jVR7xQ3cNPvXZ7ihsrktaM.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_fall_4-JFCnR5peQi9ixh35KnsV6A.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_fall_5-MyWnwoxdz5qJUnLRkhLvu2.webp",
     ],
   },
 ];
@@ -99,22 +122,41 @@ function RevealSection({ children, delay = 0, className = "" }: { children: Reac
   );
 }
 
+function useInView(threshold = 0.3) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold, rootMargin: "100px 0px 100px 0px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [threshold]);
+  return { ref, inView };
+}
+
 /* ─── 3D Collection Carousel ─── */
 function CollectionCarousel({ collection, index }: { collection: typeof collections[0]; index: number }) {
   const [active, setActive] = useState(0);
   const total = collection.images.length;
   const isEven = index % 2 === 0;
+  const { ref: sectionRef, inView } = useInView(0.15);
 
   // Auto-advance
   useEffect(() => {
+    if (!inView) return;
     const interval = setInterval(() => {
       setActive((prev) => (prev + 1) % total);
-    }, 4500);
+    }, 4000);
     return () => clearInterval(interval);
-  }, [total]);
+  }, [total, inView]);
 
   return (
     <section
+      ref={sectionRef}
       className="collection-section"
       style={{
         position: "relative",
@@ -124,8 +166,13 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
         justifyContent: "center",
         overflow: "hidden",
         padding: "6rem 0",
+        background: collection.bgColor,
+        transition: "background 1.2s cubic-bezier(0.23, 1, 0.32, 1)",
       }}
     >
+      {/* Seasonal particles */}
+      <SeasonalParticles season={collection.seasonKey} active={inView} />
+
       {/* Background text — BEHIND images */}
       <div
         aria-hidden="true"
@@ -148,7 +195,7 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
             fontSize: "clamp(100px, 22vw, 320px)",
             letterSpacing: "-0.03em",
             lineHeight: 0.85,
-            color: "rgba(0,0,0,0.04)",
+            color: collection.textColor,
             whiteSpace: "nowrap",
             userSelect: "none",
           }}
@@ -162,7 +209,7 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
             fontSize: "clamp(40px, 8vw, 100px)",
             letterSpacing: "0.1em",
             lineHeight: 1,
-            color: "rgba(0,0,0,0.03)",
+            color: collection.textColor,
             whiteSpace: "nowrap",
             userSelect: "none",
             marginTop: "-1rem",
@@ -186,12 +233,14 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
       >
         {collection.images.map((img, i) => {
           const offset = i - active;
+          // Wrap around for smooth cycling
+          const wrappedOffset = offset > total / 2 ? offset - total : offset < -total / 2 ? offset + total : offset;
           const isActive = i === active;
-          const translateX = offset * 60;
-          const translateZ = isActive ? 0 : -180;
-          const rotateY = offset * -15;
-          const opacity = Math.abs(offset) > 1 ? 0 : isActive ? 1 : 0.55;
-          const scale = isActive ? 1 : 0.85;
+          const translateX = wrappedOffset * 50;
+          const translateZ = isActive ? 0 : -150 - Math.abs(wrappedOffset) * 30;
+          const rotateY = wrappedOffset * -12;
+          const opacity = Math.abs(wrappedOffset) > 2 ? 0 : isActive ? 1 : 0.5 - Math.abs(wrappedOffset) * 0.15;
+          const scale = isActive ? 1 : 0.82 - Math.abs(wrappedOffset) * 0.05;
 
           return (
             <div
@@ -201,13 +250,13 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
                 position: "absolute",
                 top: "50%",
                 left: "50%",
-                width: "clamp(260px, 40vw, 420px)",
+                width: "clamp(240px, 36vw, 380px)",
                 aspectRatio: "3/4",
                 transform: `translate(-50%, -50%) translateX(${translateX}%) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
-                opacity,
+                opacity: Math.max(0, opacity),
                 transition: "all 800ms cubic-bezier(0.23, 1, 0.32, 1)",
                 cursor: isActive ? "default" : "pointer",
-                zIndex: isActive ? 10 : 5 - Math.abs(offset),
+                zIndex: isActive ? 10 : 5 - Math.abs(wrappedOffset),
                 boxShadow: isActive ? "0 30px 80px rgba(0,0,0,0.15)" : "0 10px 40px rgba(0,0,0,0.08)",
               }}
             >
@@ -237,7 +286,7 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
           justifyContent: "center",
           alignItems: isEven ? "flex-end" : "flex-start",
           pointerEvents: "none",
-          zIndex: 3,
+          zIndex: 6,
           padding: "0 4vw",
         }}
       >
@@ -248,7 +297,7 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
             fontSize: "clamp(60px, 14vw, 200px)",
             letterSpacing: "-0.02em",
             lineHeight: 0.85,
-            color: "rgba(0,0,0,0.07)",
+            color: collection.textColor,
             whiteSpace: "nowrap",
             userSelect: "none",
             mixBlendMode: "multiply",
@@ -263,7 +312,7 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
             fontSize: "clamp(14px, 2vw, 22px)",
             letterSpacing: "0.2em",
             textTransform: "uppercase",
-            color: "rgba(0,0,0,0.35)",
+            color: collection.subtitleColor,
             marginTop: "0.5rem",
           }}
         >
@@ -278,7 +327,7 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
           bottom: "3rem",
           left: "50%",
           transform: "translateX(-50%)",
-          zIndex: 4,
+          zIndex: 7,
           display: "flex",
           gap: "0.75rem",
           alignItems: "center",
@@ -293,7 +342,7 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
               width: i === active ? 24 : 6,
               height: 6,
               borderRadius: 3,
-              background: i === active ? "rgba(0,0,0,0.7)" : "rgba(0,0,0,0.15)",
+              background: i === active ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.12)",
               border: "none",
               transition: "all 400ms cubic-bezier(0.23,1,0.32,1)",
               cursor: "pointer",
@@ -360,64 +409,16 @@ export default function Home() {
             overflow: "hidden",
           }}
         >
-          <span
-            style={{
-              fontFamily: "'Bodoni Moda', serif",
-              fontWeight: 400,
-              fontSize: "clamp(80px, 18vw, 220px)",
-              letterSpacing: "-0.02em",
-              lineHeight: 0.9,
-              color: "rgba(0,0,0,0.05)",
-              whiteSpace: "nowrap",
-              paddingLeft: "2vw",
-              userSelect: "none",
-            }}
-          >
+          <span style={{ fontFamily: "'Bodoni Moda', serif", fontWeight: 400, fontSize: "clamp(80px, 18vw, 220px)", letterSpacing: "-0.02em", lineHeight: 0.9, color: "rgba(0,0,0,0.05)", whiteSpace: "nowrap", paddingLeft: "2vw", userSelect: "none" }}>
             2026
           </span>
-          <span
-            style={{
-              fontFamily: "'Bodoni Moda', serif",
-              fontWeight: 400,
-              fontSize: "clamp(60px, 14vw, 180px)",
-              letterSpacing: "-0.02em",
-              lineHeight: 0.9,
-              color: "rgba(0,0,0,0.05)",
-              whiteSpace: "nowrap",
-              paddingLeft: "2vw",
-              userSelect: "none",
-            }}
-          >
+          <span style={{ fontFamily: "'Bodoni Moda', serif", fontWeight: 400, fontSize: "clamp(60px, 14vw, 180px)", letterSpacing: "-0.02em", lineHeight: 0.9, color: "rgba(0,0,0,0.05)", whiteSpace: "nowrap", paddingLeft: "2vw", userSelect: "none" }}>
             LOTIUS
           </span>
-          <span
-            style={{
-              fontFamily: "'Bodoni Moda', serif",
-              fontWeight: 400,
-              fontSize: "clamp(40px, 9vw, 120px)",
-              letterSpacing: "-0.02em",
-              lineHeight: 0.9,
-              color: "rgba(0,0,0,0.05)",
-              whiteSpace: "nowrap",
-              paddingLeft: "2vw",
-              userSelect: "none",
-            }}
-          >
+          <span style={{ fontFamily: "'Bodoni Moda', serif", fontWeight: 400, fontSize: "clamp(40px, 9vw, 120px)", letterSpacing: "-0.02em", lineHeight: 0.9, color: "rgba(0,0,0,0.05)", whiteSpace: "nowrap", paddingLeft: "2vw", userSelect: "none" }}>
             AWARD
           </span>
-          <span
-            style={{
-              fontFamily: "'Bodoni Moda', serif",
-              fontWeight: 400,
-              fontSize: "clamp(30px, 7vw, 90px)",
-              letterSpacing: "-0.02em",
-              lineHeight: 0.9,
-              color: "rgba(0,0,0,0.05)",
-              whiteSpace: "nowrap",
-              paddingLeft: "2vw",
-              userSelect: "none",
-            }}
-          >
+          <span style={{ fontFamily: "'Bodoni Moda', serif", fontWeight: 400, fontSize: "clamp(30px, 7vw, 90px)", letterSpacing: "-0.02em", lineHeight: 0.9, color: "rgba(0,0,0,0.05)", whiteSpace: "nowrap", paddingLeft: "2vw", userSelect: "none" }}>
             FINALISTS
           </span>
         </div>
@@ -485,96 +486,25 @@ export default function Home() {
           }}
         >
           <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-            <button
-              onClick={goPrev}
-              aria-label="Previous finalist"
-              style={{
-                fontFamily: "'Bodoni Moda', serif",
-                fontSize: 10,
-                letterSpacing: "0.3em",
-                opacity: 0.5,
-                background: "none",
-                border: "none",
-                color: "inherit",
-                padding: "0.25rem",
-              }}
-            >
-              ←
-            </button>
-            <span className="label-caps" style={{ opacity: 0.5 }}>
-              {current + 1} / {finalists.length}
-            </span>
-            <button
-              onClick={goNext}
-              aria-label="Next finalist"
-              style={{
-                fontFamily: "'Bodoni Moda', serif",
-                fontSize: 10,
-                letterSpacing: "0.3em",
-                opacity: 0.5,
-                background: "none",
-                border: "none",
-                color: "inherit",
-                padding: "0.25rem",
-              }}
-            >
-              →
-            </button>
+            <button onClick={goPrev} aria-label="Previous finalist" style={{ fontFamily: "'Bodoni Moda', serif", fontSize: 10, letterSpacing: "0.3em", opacity: 0.5, background: "none", border: "none", color: "inherit", padding: "0.25rem" }}>←</button>
+            <span className="label-caps" style={{ opacity: 0.5 }}>{current + 1} / {finalists.length}</span>
+            <button onClick={goNext} aria-label="Next finalist" style={{ fontFamily: "'Bodoni Moda', serif", fontSize: 10, letterSpacing: "0.3em", opacity: 0.5, background: "none", border: "none", color: "inherit", padding: "0.25rem" }}>→</button>
           </div>
 
           <div style={{ textAlign: "center" }}>
-            <p
-              style={{
-                fontFamily: "'Bodoni Moda', serif",
-                fontWeight: 400,
-                fontSize: "clamp(14px, 2vw, 20px)",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                margin: 0,
-              }}
-            >
+            <p style={{ fontFamily: "'Bodoni Moda', serif", fontWeight: 400, fontSize: "clamp(14px, 2vw, 20px)", letterSpacing: "0.1em", textTransform: "uppercase", margin: 0 }}>
               {finalist.name}
             </p>
-            <p className="label-caps" style={{ opacity: 0.5, marginTop: "0.25rem" }}>
-              {finalist.brand}
-            </p>
+            <p className="label-caps" style={{ opacity: 0.5, marginTop: "0.25rem" }}>{finalist.brand}</p>
           </div>
 
-          <button
-            onClick={() => setIsPaused((p) => !p)}
-            aria-label={isPaused ? "Resume slideshow" : "Pause slideshow"}
-            style={{
-              fontFamily: "'Bodoni Moda', serif",
-              fontSize: 9,
-              letterSpacing: "0.35em",
-              textTransform: "uppercase",
-              opacity: 0.5,
-              background: "none",
-              border: "none",
-              color: "inherit",
-              padding: "0.25rem",
-            }}
-          >
+          <button onClick={() => setIsPaused((p) => !p)} aria-label={isPaused ? "Resume slideshow" : "Pause slideshow"} style={{ fontFamily: "'Bodoni Moda', serif", fontSize: 9, letterSpacing: "0.35em", textTransform: "uppercase", opacity: 0.5, background: "none", border: "none", color: "inherit", padding: "0.25rem" }}>
             {isPaused ? "▶" : "⏸"}
           </button>
         </div>
 
         {/* Scroll indicator */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: "5rem",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 4,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "0.5rem",
-            opacity: 0.4,
-            animation: "floatDown 2s ease-in-out infinite",
-          }}
-        >
+        <div style={{ position: "absolute", bottom: "5rem", left: "50%", transform: "translateX(-50%)", zIndex: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", opacity: 0.4, animation: "floatDown 2s ease-in-out infinite" }}>
           <span className="label-caps-sm">SCROLL</span>
           <div style={{ width: 1, height: 24, background: "rgba(0,0,0,0.3)" }} />
         </div>
@@ -586,16 +516,7 @@ export default function Home() {
       <section style={{ padding: "10rem 0", background: "#fff" }}>
         <RevealSection>
           <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 2rem", textAlign: "center" }}>
-            <p
-              style={{
-                fontFamily: "'Bodoni Moda', serif",
-                fontWeight: 400,
-                fontSize: "clamp(18px, 3vw, 28px)",
-                letterSpacing: "0.04em",
-                lineHeight: 1.6,
-                color: "rgba(0,0,0,0.8)",
-              }}
-            >
+            <p style={{ fontFamily: "'Bodoni Moda', serif", fontWeight: 400, fontSize: "clamp(18px, 3vw, 28px)", letterSpacing: "0.04em", lineHeight: 1.6, color: "rgba(0,0,0,0.8)" }}>
               THE LOTIUS AWARD WAS CREATED TO CELEBRATE AND SUPPORT CREATIVE
               TALENT FROM AROUND THE WORLD. EACH SEASON, WE PRESENT COLLECTIONS
               THAT DEFINE THE FUTURE OF FASHION.
@@ -608,39 +529,102 @@ export default function Home() {
           SECTION 3-5: Collection Carousels (Spring, Summer, Fall)
           ═══════════════════════════════════════════════════════ */}
       {collections.map((col, i) => (
-        <RevealSection key={col.season} delay={i * 100}>
-          <CollectionCarousel collection={col} index={i} />
-        </RevealSection>
+        <CollectionCarousel key={col.season} collection={col} index={i} />
       ))}
 
       {/* ═══════════════════════════════════════════════════════
-          SECTION 6: CTA / Explore
+          SECTION 6: About Me
           ═══════════════════════════════════════════════════════ */}
-      <section style={{ padding: "8rem 0", background: "#fff" }}>
+      <section style={{ padding: "8rem 0", background: "#fff", borderTop: "0.5px solid rgba(0,0,0,0.08)" }}>
         <RevealSection>
-          <div style={{ textAlign: "center" }}>
+          <div style={{ maxWidth: 700, margin: "0 auto", padding: "0 2rem", textAlign: "center" }}>
+            <span className="label-caps" style={{ opacity: 0.4, display: "block", marginBottom: "2rem" }}>
+              ABOUT THE DESIGNER
+            </span>
             <h2
               style={{
                 fontFamily: "'Bodoni Moda', serif",
                 fontWeight: 400,
-                fontSize: "clamp(32px, 6vw, 64px)",
-                letterSpacing: "-0.02em",
+                fontSize: "clamp(32px, 5vw, 52px)",
+                letterSpacing: "-0.01em",
                 marginBottom: "2rem",
               }}
             >
-              Explore the Award
+              The Vision Behind Lotius
             </h2>
             <p
               style={{
                 fontFamily: "'Cormorant Garamond', serif",
                 fontWeight: 300,
-                fontSize: "clamp(14px, 1.8vw, 18px)",
-                lineHeight: 1.7,
-                maxWidth: 600,
-                margin: "0 auto 3rem",
-                color: "rgba(0,0,0,0.6)",
+                fontSize: "clamp(16px, 2vw, 20px)",
+                lineHeight: 1.8,
+                color: "rgba(0,0,0,0.65)",
+                marginBottom: "3rem",
               }}
             >
+              Lotius is a creative expression born from the intersection of art, fashion,
+              and culture. Each collection tells a story — from the delicate bloom of spring
+              to the rich warmth of autumn. We believe in the power of design to transform,
+              inspire, and connect people across the world.
+            </p>
+
+            {/* Instagram link */}
+            <a
+              href="https://www.instagram.com/i.cxccc?igsh=MTUxYm45amdsdmo3bw%3D%3D&utm_source=qr"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.75rem",
+                fontFamily: "'Bodoni Moda', serif",
+                fontSize: 11,
+                letterSpacing: "0.3em",
+                textTransform: "uppercase",
+                color: "rgba(0,0,0,0.7)",
+                textDecoration: "none",
+                padding: "1rem 2rem",
+                border: "0.5px solid rgba(0,0,0,0.2)",
+                transition: "all 300ms cubic-bezier(0.23, 1, 0.32, 1)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(0,0,0,0.9)";
+                e.currentTarget.style.color = "#fff";
+                e.currentTarget.style.borderColor = "rgba(0,0,0,0.9)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = "rgba(0,0,0,0.7)";
+                e.currentTarget.style.borderColor = "rgba(0,0,0,0.2)";
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+              </svg>
+              @i.cxccc
+            </a>
+
+            <div style={{ marginTop: "2rem" }}>
+              <p style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: 14, color: "rgba(0,0,0,0.4)", letterSpacing: "0.05em" }}>
+                Follow for behind-the-scenes, new collections, and creative inspiration.
+              </p>
+            </div>
+          </div>
+        </RevealSection>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          SECTION 7: CTA / Explore
+          ═══════════════════════════════════════════════════════ */}
+      <section style={{ padding: "8rem 0", background: "#faf8f5" }}>
+        <RevealSection>
+          <div style={{ textAlign: "center" }}>
+            <h2 style={{ fontFamily: "'Bodoni Moda', serif", fontWeight: 400, fontSize: "clamp(32px, 6vw, 64px)", letterSpacing: "-0.02em", marginBottom: "2rem" }}>
+              Explore the Award
+            </h2>
+            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "clamp(14px, 1.8vw, 18px)", lineHeight: 1.7, maxWidth: 600, margin: "0 auto 3rem", color: "rgba(0,0,0,0.6)" }}>
               Discover the laureates, meet the council, and learn about our
               commitment to nurturing the next generation of fashion visionaries.
             </p>
