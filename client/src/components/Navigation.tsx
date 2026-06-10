@@ -1,9 +1,3 @@
-/**
- * Navigation — Lotius
- * Design: Hamburger morphs to X via SVG path animation (smooth, not icon swap).
- * Full-screen overlay with seasonal collection sections + Contact Us (mailto).
- * Spring / Summer / Fall links scroll to their respective sections on the homepage.
- */
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Instagram } from "lucide-react";
@@ -20,6 +14,7 @@ const seasonLinks = [
   { label: "SPRING 2026", href: "/#spring", color: "rgba(200, 100, 120, 0.7)" },
   { label: "SUMMER 2026", href: "/#summer", color: "rgba(30, 120, 200, 0.7)" },
   { label: "FALL 2026", href: "/#fall", color: "rgba(160, 80, 20, 0.7)" },
+  { label: "WINTER 2026", href: "/#winter", color: "rgba(30, 80, 160, 0.7)" },
 ];
 
 export default function Navigation() {
@@ -61,12 +56,12 @@ export default function Navigation() {
 
   return (
     <>
-      {/* ─── Top bar ─── */}
+
       <header
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
         style={{ padding: "1.25rem 1.5rem" }}
       >
-        {/* Hamburger / X toggle — SVG morphing lines */}
+        {/* Hamburger / X toggle */}
         <button
           onClick={() => setOpen((v) => !v)}
           aria-label={open ? "Close navigation menu" : "Open navigation menu"}
@@ -86,7 +81,7 @@ export default function Navigation() {
             gap: 0,
           }}
         >
-          {/* Line 1 — top bar → top-left to bottom-right diagonal */}
+          {/* Line 1 */}
           <span
             style={{
               display: "block",
@@ -99,7 +94,7 @@ export default function Navigation() {
               marginBottom: open ? 0 : "5px",
             }}
           />
-          {/* Line 2 — middle bar → fades out */}
+          {/* Line 2 */}
           <span
             style={{
               display: "block",
@@ -111,7 +106,7 @@ export default function Navigation() {
               marginBottom: open ? 0 : "5px",
             }}
           />
-          {/* Line 3 — bottom bar → top-right to bottom-left diagonal */}
+          {/* Line 3 */}
           <span
             style={{
               display: "block",
@@ -162,7 +157,7 @@ export default function Navigation() {
         </div>
       </header>
 
-      {/* ─── Full-screen overlay menu ─── */}
+
       <div
         role="dialog"
         aria-modal="true"

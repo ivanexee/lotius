@@ -1,16 +1,6 @@
-/**
- * SeasonalParticles — Lotius
- * Scroll-triggered atmospheric particle effects for each season:
- * - Spring: Sakura petals falling gracefully from top-right
- * - Summer: Golden fireflies / sun motes floating upward
- * - Fall: Autumn leaves drifting down with rotation
- *
- * Uses IntersectionObserver to activate when the section approaches viewport.
- * Canvas-based for smooth 60fps performance.
- */
 import { useEffect, useRef, useState } from "react";
 
-type Season = "spring" | "summer" | "fall";
+type Season = "spring" | "summer" | "fall" | "winter";
 
 interface Particle {
   x: number;
@@ -22,15 +12,16 @@ interface Particle {
   rotationSpeed: number;
   opacity: number;
   color: string;
-  // For leaves: wobble phase
   wobblePhase: number;
   wobbleSpeed: number;
+  arms?: number; // for snowflakes
 }
 
 const COLORS: Record<Season, string[]> = {
-  spring: ["#ffb7c5", "#ffc1cc", "#ff9eb5", "#ffd1dc", "#fff0f3"],
-  summer: ["#ffd700", "#ffec8b", "#fff8dc", "#ffe4b5", "#ffefd5"],
-  fall: ["#d2691e", "#cd853f", "#b8860b", "#8b4513", "#a0522d", "#daa520", "#cc5500"],
+  spring: ["#ffb7c5", "#ffc1cc", "#ff9eb5", "#ffd1dc", "#fff0f3", "#f9a8c9"],
+  summer: [], // summer uses waves only — no particles
+  fall: ["#d2691e", "#cd853f", "#b8860b", "#8b4513", "#a0522d", "#daa520", "#cc5500", "#e07b39"],
+  winter: ["#e8f4fd", "#cce7f7", "#b3d9f0", "#ddeeff", "#f0f8ff", "#c9e6f5"],
 };
 
 function createParticle(season: Season, canvasWidth: number, canvasHeight: number): Particle {
@@ -38,7 +29,6 @@ function createParticle(season: Season, canvasWidth: number, canvasHeight: numbe
   const color = colors[Math.floor(Math.random() * colors.length)];
 
   if (season === "spring") {
-    // Sakura petals: fall from top-right area, drift left
     return {
       x: canvasWidth * 0.4 + Math.random() * canvasWidth * 0.7,
       y: -20 - Math.random() * 100,
@@ -52,23 +42,7 @@ function createParticle(season: Season, canvasWidth: number, canvasHeight: numbe
       wobblePhase: Math.random() * Math.PI * 2,
       wobbleSpeed: 0.02 + Math.random() * 0.02,
     };
-  } else if (season === "summer") {
-    // Fireflies: float upward from bottom, gentle drift
-    return {
-      x: Math.random() * canvasWidth,
-      y: canvasHeight + 20 + Math.random() * 50,
-      size: 2 + Math.random() * 4,
-      speedX: (Math.random() - 0.5) * 0.4,
-      speedY: -0.4 - Math.random() * 0.8,
-      rotation: 0,
-      rotationSpeed: 0,
-      opacity: 0.3 + Math.random() * 0.6,
-      color,
-      wobblePhase: Math.random() * Math.PI * 2,
-      wobbleSpeed: 0.03 + Math.random() * 0.02,
-    };
-  } else {
-    // Fall leaves: drift down with rotation and wobble
+  } else if (season === "fall") {
     return {
       x: Math.random() * canvasWidth * 1.2 - canvasWidth * 0.1,
       y: -30 - Math.random() * 80,
@@ -82,6 +56,22 @@ function createParticle(season: Season, canvasWidth: number, canvasHeight: numbe
       wobblePhase: Math.random() * Math.PI * 2,
       wobbleSpeed: 0.015 + Math.random() * 0.02,
     };
+  } else {
+    // Winter snowflakes — fall from top, gentle drift
+    return {
+      x: Math.random() * canvasWidth * 1.1 - canvasWidth * 0.05,
+      y: -20 - Math.random() * 80,
+      size: 3 + Math.random() * 9,
+      speedX: (Math.random() - 0.5) * 0.5,
+      speedY: 0.5 + Math.random() * 1.0,
+      rotation: Math.random() * 360,
+      rotationSpeed: (Math.random() - 0.5) * 0.8,
+      opacity: 0.3 + Math.random() * 0.55,
+      color,
+      wobblePhase: Math.random() * Math.PI * 2,
+      wobbleSpeed: 0.01 + Math.random() * 0.015,
+      arms: [6, 8][Math.floor(Math.random() * 2)],
+    };
   }
 }
 
@@ -91,44 +81,14 @@ function drawPetal(ctx: CanvasRenderingContext2D, p: Particle) {
   ctx.rotate((p.rotation * Math.PI) / 180);
   ctx.globalAlpha = p.opacity;
   ctx.fillStyle = p.color;
-
-  // Petal shape
   ctx.beginPath();
   ctx.ellipse(0, 0, p.size * 0.6, p.size, 0, 0, Math.PI * 2);
   ctx.fill();
-
-  // Inner detail
   ctx.globalAlpha = p.opacity * 0.3;
   ctx.fillStyle = "#fff";
   ctx.beginPath();
   ctx.ellipse(0, 0, p.size * 0.2, p.size * 0.5, 0, 0, Math.PI * 2);
   ctx.fill();
-
-  ctx.restore();
-}
-
-function drawFirefly(ctx: CanvasRenderingContext2D, p: Particle) {
-  ctx.save();
-  ctx.translate(p.x, p.y);
-  ctx.globalAlpha = p.opacity;
-
-  // Glow
-  const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, p.size * 3);
-  gradient.addColorStop(0, p.color);
-  gradient.addColorStop(0.4, p.color + "80");
-  gradient.addColorStop(1, "transparent");
-  ctx.fillStyle = gradient;
-  ctx.beginPath();
-  ctx.arc(0, 0, p.size * 3, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Core
-  ctx.globalAlpha = p.opacity * 1.2;
-  ctx.fillStyle = "#fff";
-  ctx.beginPath();
-  ctx.arc(0, 0, p.size * 0.5, 0, Math.PI * 2);
-  ctx.fill();
-
   ctx.restore();
 }
 
@@ -138,21 +98,65 @@ function drawLeaf(ctx: CanvasRenderingContext2D, p: Particle) {
   ctx.rotate((p.rotation * Math.PI) / 180);
   ctx.globalAlpha = p.opacity;
   ctx.fillStyle = p.color;
-
-  // Leaf shape
   ctx.beginPath();
   ctx.moveTo(0, -p.size);
   ctx.bezierCurveTo(p.size * 0.6, -p.size * 0.6, p.size * 0.6, p.size * 0.3, 0, p.size);
   ctx.bezierCurveTo(-p.size * 0.6, p.size * 0.3, -p.size * 0.6, -p.size * 0.6, 0, -p.size);
   ctx.fill();
-
-  // Vein
-  ctx.strokeStyle = "rgba(0,0,0,0.15)";
+  ctx.strokeStyle = "rgba(0,0,0,0.12)";
   ctx.lineWidth = 0.5;
   ctx.beginPath();
   ctx.moveTo(0, -p.size * 0.8);
   ctx.lineTo(0, p.size * 0.8);
   ctx.stroke();
+  ctx.restore();
+}
+
+function drawSnowflake(ctx: CanvasRenderingContext2D, p: Particle) {
+  const arms = p.arms ?? 6;
+  ctx.save();
+  ctx.translate(p.x, p.y);
+  ctx.rotate((p.rotation * Math.PI) / 180);
+  ctx.globalAlpha = p.opacity;
+  ctx.strokeStyle = p.color;
+  ctx.lineWidth = Math.max(0.5, p.size * 0.12);
+  ctx.lineCap = "round";
+
+  for (let i = 0; i < arms; i++) {
+    const angle = (i / arms) * Math.PI * 2;
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    const len = p.size;
+
+    // Main arm
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(cos * len, sin * len);
+    ctx.stroke();
+
+    // Branch 1
+    const b1x = cos * len * 0.55;
+    const b1y = sin * len * 0.55;
+    const bAngle1 = angle + Math.PI / 4;
+    ctx.beginPath();
+    ctx.moveTo(b1x, b1y);
+    ctx.lineTo(b1x + Math.cos(bAngle1) * len * 0.28, b1y + Math.sin(bAngle1) * len * 0.28);
+    ctx.stroke();
+
+    // Branch 2 (mirror)
+    const bAngle2 = angle - Math.PI / 4;
+    ctx.beginPath();
+    ctx.moveTo(b1x, b1y);
+    ctx.lineTo(b1x + Math.cos(bAngle2) * len * 0.28, b1y + Math.sin(bAngle2) * len * 0.28);
+    ctx.stroke();
+  }
+
+  // Center dot
+  ctx.globalAlpha = p.opacity * 0.8;
+  ctx.fillStyle = p.color;
+  ctx.beginPath();
+  ctx.arc(0, 0, p.size * 0.12, 0, Math.PI * 2);
+  ctx.fill();
 
   ctx.restore();
 }
@@ -168,18 +172,22 @@ export default function SeasonalParticles({ season, active }: SeasonalParticlesP
   const animFrameRef = useRef<number>(0);
   const [opacity, setOpacity] = useState(0);
 
+  // Summer has no particles — just waves
+  const hasParticles = season !== "summer";
+
   useEffect(() => {
-    if (active) {
+    if (active && hasParticles) {
       setOpacity(1);
     } else {
       setOpacity(0);
     }
-  }, [active]);
+  }, [active, hasParticles]);
 
   useEffect(() => {
+    if (!hasParticles) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -191,7 +199,7 @@ export default function SeasonalParticles({ season, active }: SeasonalParticlesP
     resize();
     window.addEventListener("resize", resize);
 
-    const maxParticles = season === "summer" ? 30 : 25;
+    const maxParticles = season === "winter" ? 40 : 25;
     let frameCount = 0;
 
     const animate = () => {
@@ -200,46 +208,36 @@ export default function SeasonalParticles({ season, active }: SeasonalParticlesP
       ctx.clearRect(0, 0, w, h);
 
       if (!active) {
-        // Fade out existing particles
         particlesRef.current = particlesRef.current.filter((p) => {
-          p.opacity -= 0.01;
+          p.opacity -= 0.008;
           return p.opacity > 0;
         });
       }
 
-      // Spawn new particles
       if (active && particlesRef.current.length < maxParticles) {
         frameCount++;
-        if (frameCount % 8 === 0) {
+        const spawnRate = season === "winter" ? 6 : 8;
+        if (frameCount % spawnRate === 0) {
           particlesRef.current.push(createParticle(season, w, h));
         }
       }
 
-      // Update and draw
       particlesRef.current = particlesRef.current.filter((p) => {
-        // Update position
         p.wobblePhase += p.wobbleSpeed;
-        const wobble = Math.sin(p.wobblePhase) * 1.5;
+        const wobble = Math.sin(p.wobblePhase) * (season === "winter" ? 1.0 : 1.5);
 
         p.x += p.speedX + wobble * 0.3;
         p.y += p.speedY;
         p.rotation += p.rotationSpeed;
 
-        // Draw based on season
         if (season === "spring") {
           drawPetal(ctx, p);
-        } else if (season === "summer") {
-          // Fireflies pulse
-          p.opacity = 0.3 + Math.sin(p.wobblePhase * 2) * 0.3;
-          drawFirefly(ctx, p);
-        } else {
+        } else if (season === "fall") {
           drawLeaf(ctx, p);
+        } else if (season === "winter") {
+          drawSnowflake(ctx, p);
         }
 
-        // Remove if out of bounds
-        if (season === "summer") {
-          return p.y > -50 && p.opacity > 0;
-        }
         return p.y < h + 50 && p.x > -50 && p.x < w + 50 && p.opacity > 0;
       });
 
@@ -252,7 +250,9 @@ export default function SeasonalParticles({ season, active }: SeasonalParticlesP
       window.removeEventListener("resize", resize);
       cancelAnimationFrame(animFrameRef.current);
     };
-  }, [season, active]);
+  }, [season, active, hasParticles]);
+
+  if (!hasParticles) return null;
 
   return (
     <canvas

@@ -1,14 +1,3 @@
-/**
- * Home — Lotius
- * Design: Smooth scroll-driven experience with seasonal atmospheric transitions
- * - Hero section with auto-rotating finalists in 3D perspective
- * - Spring / Summer / Fall collections with FLOATING spring-physics 3D carousels
- * - Summer section: animated translucent waves clashing behind the gallery
- * - Seasonal particle effects: sakura petals, fireflies, autumn leaves
- * - Background color transitions to match each season
- * - About Me section with Instagram link
- * - Section IDs for nav scroll-to links
- */
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "wouter";
 import Navigation from "@/components/Navigation";
@@ -68,9 +57,9 @@ const collections = [
     seasonKey: "summer" as const,
     year: "2026",
     subtitle: "Azure Meridian",
-    bgColor: "#f0f7fd",
-    textColor: "rgba(30, 100, 180, 0.06)",
-    subtitleColor: "rgba(30, 100, 180, 0.4)",
+    bgColor: "#e8f6fd",
+    textColor: "rgba(0, 130, 200, 0.07)",
+    subtitleColor: "rgba(0, 130, 200, 0.4)",
     images: [
       "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_summer_1-44dMeJXFkLUfeJM7U3FCrc.webp",
       "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_summer_2-362jnR6ddyKSU6G5SKpZHr.webp",
@@ -86,7 +75,7 @@ const collections = [
     year: "2026",
     subtitle: "Amber Reverie",
     bgColor: "#faf3eb",
-    textColor: "rgba(139, 69, 19, 0.06)",
+    textColor: "rgba(139, 69, 19, 0.07)",
     subtitleColor: "rgba(139, 69, 19, 0.45)",
     images: [
       "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_fall_1-StcMkgsqPMudxk9GEgzvW4.webp",
@@ -96,10 +85,27 @@ const collections = [
       "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_fall_5-MyWnwoxdz5qJUnLRkhLvu2.webp",
     ],
   },
+  {
+    id: "winter",
+    season: "WINTER" as const,
+    seasonKey: "winter" as const,
+    year: "2026",
+    subtitle: "Glacial Reverie",
+    bgColor: "#eef4f9",
+    textColor: "rgba(30, 80, 140, 0.07)",
+    subtitleColor: "rgba(30, 80, 140, 0.38)",
+    images: [
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_winter_1-6cpR3iXpsKszZBtME2X8dm.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_winter_2-a2zdPfRriymjXs7CmKWCDy.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_winter_3-KMtbqHEBfjp6eHc4GxBGye.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_winter_4-45CkQY9spakyGkpczjxUn7.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_winter_5-VMYxYADbqyW2bTDwMBwtqc.webp",
+    ],
+  },
 ];
 
 /* ─── Hooks ─── */
-function useReveal() {
+function useScrollReveal() {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = ref.current;
@@ -120,7 +126,7 @@ function useReveal() {
 }
 
 function RevealSection({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
-  const ref = useReveal();
+  const ref = useScrollReveal();
   return (
     <div ref={ref} className={`reveal ${className}`} style={{ transitionDelay: `${delay}ms` }}>
       {children}
@@ -144,32 +150,148 @@ function useInView(threshold = 0.3) {
   return { ref, inView };
 }
 
-/* ─── Spring physics hook ─── */
-function useSpringFloat(active: boolean) {
+function useOrganicFloat(active: boolean) {
   const [floatY, setFloatY] = useState(0);
   const [floatRot, setFloatRot] = useState(0);
   const frameRef = useRef<number>(0);
-  const timeRef = useRef(0);
 
   useEffect(() => {
     if (!active) {
       cancelAnimationFrame(frameRef.current);
       return;
     }
-    const animate = (t: number) => {
-      timeRef.current = t;
-      // Gentle sine-based floating — multiple harmonics for organic feel
+    const tick = (t: number) => {
       const y = Math.sin(t * 0.0008) * 6 + Math.sin(t * 0.0013) * 3;
       const rot = Math.sin(t * 0.0006) * 0.4 + Math.sin(t * 0.001) * 0.2;
       setFloatY(y);
       setFloatRot(rot);
-      frameRef.current = requestAnimationFrame(animate);
+      frameRef.current = requestAnimationFrame(tick);
     };
-    frameRef.current = requestAnimationFrame(animate);
+    frameRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frameRef.current);
   }, [active]);
 
   return { floatY, floatRot };
+}
+
+/* ─── Card with Shop the Look hover ─── */
+function CollectionCard({
+  img,
+  season,
+  index,
+  active,
+  total,
+  onClick,
+  isDragging,
+  floatY,
+}: {
+  img: string;
+  season: string;
+  index: number;
+  active: number;
+  total: number;
+  onClick: () => void;
+  isDragging: React.MutableRefObject<boolean>;
+  floatY: number;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const offset = index - active;
+  const wrappedOffset = offset > total / 2 ? offset - total : offset < -total / 2 ? offset + total : offset;
+  const isActive = index === active;
+  const translateX = wrappedOffset * 50;
+  const translateZ = isActive ? 0 : -150 - Math.abs(wrappedOffset) * 30;
+  const rotateY = wrappedOffset * -12;
+  const opacity = Math.abs(wrappedOffset) > 2 ? 0 : isActive ? 1 : 0.5 - Math.abs(wrappedOffset) * 0.15;
+  const scale = isActive ? 1 : 0.82 - Math.abs(wrappedOffset) * 0.05;
+  const cardFloat = isActive ? 0 : Math.sin(Date.now() * 0.001 + index * 1.2) * 4;
+
+  return (
+    <div
+      onClick={() => { if (!isDragging.current) onClick(); }}
+      onMouseEnter={() => isActive && setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        width: "clamp(240px, 36vw, 380px)",
+        aspectRatio: "3/4",
+        transform: `translate(-50%, calc(-50% + ${isActive ? floatY : cardFloat}px)) translateX(${translateX}%) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
+        opacity: Math.max(0, opacity),
+        transition: "transform 800ms cubic-bezier(0.23, 1, 0.32, 1), opacity 800ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 400ms",
+        cursor: isActive ? "grab" : "pointer",
+        zIndex: isActive ? 10 : 5 - Math.abs(wrappedOffset),
+        boxShadow: isActive
+          ? "0 40px 100px rgba(0,0,0,0.18), 0 8px 30px rgba(0,0,0,0.10)"
+          : "0 10px 40px rgba(0,0,0,0.08)",
+        overflow: "hidden",
+      }}
+    >
+      <img
+        src={img}
+        alt={`${season} collection look ${index + 1}`}
+        draggable={false}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          display: "block",
+          pointerEvents: "none",
+          transition: "transform 600ms cubic-bezier(0.23, 1, 0.32, 1)",
+          transform: hovered ? "scale(1.04)" : "scale(1)",
+        }}
+      />
+
+      {/* Shop the Look overlay — fades in on hover of active card */}
+      {isActive && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            padding: "2rem",
+            background: "linear-gradient(to top, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.18) 50%, transparent 100%)",
+            opacity: hovered ? 1 : 0,
+            transition: "opacity 350ms cubic-bezier(0.23, 1, 0.32, 1)",
+            pointerEvents: hovered ? "auto" : "none",
+          }}
+        >
+          <a
+            href={`mailto:i.cxc@icloud.com?subject=Shop the Look — ${season} 2026 Look ${index + 1}`}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              display: "inline-block",
+              fontFamily: "'Bodoni Moda', serif",
+              fontSize: 10,
+              letterSpacing: "0.3em",
+              textTransform: "uppercase",
+              color: "#fff",
+              textDecoration: "none",
+              padding: "0.75rem 1.75rem",
+              border: "0.5px solid rgba(255,255,255,0.7)",
+              background: "rgba(0,0,0,0.35)",
+              backdropFilter: "blur(8px)",
+              transition: "all 250ms cubic-bezier(0.23, 1, 0.32, 1)",
+              transform: hovered ? "translateY(0)" : "translateY(8px)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.95)";
+              e.currentTarget.style.color = "#000";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(0,0,0,0.35)";
+              e.currentTarget.style.color = "#fff";
+            }}
+          >
+            SHOP THE LOOK
+          </a>
+        </div>
+      )}
+    </div>
+  );
 }
 
 /* ─── Floating 3D Collection Carousel ─── */
@@ -178,15 +300,11 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
   const total = collection.images.length;
   const isEven = index % 2 === 0;
   const { ref: sectionRef, inView } = useInView(0.15);
+  const { floatY, floatRot } = useOrganicFloat(inView);
 
-  // Spring float animation
-  const { floatY, floatRot } = useSpringFloat(inView);
-
-  // Drag state
-  const dragRef = useRef<{ startX: number; startActive: number } | null>(null);
+  const dragRef = useRef<{ startX: number } | null>(null);
   const isDragging = useRef(false);
 
-  // Auto-advance
   useEffect(() => {
     if (!inView) return;
     const interval = setInterval(() => {
@@ -196,26 +314,21 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
   }, [total, inView]);
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    dragRef.current = { startX: e.clientX, startActive: active };
+    dragRef.current = { startX: e.clientX };
     isDragging.current = false;
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!dragRef.current) return;
-    const dx = e.clientX - dragRef.current.startX;
-    if (Math.abs(dx) > 8) isDragging.current = true;
+    if (Math.abs(e.clientX - dragRef.current.startX) > 8) isDragging.current = true;
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
     if (!dragRef.current) return;
     const dx = e.clientX - dragRef.current.startX;
     if (Math.abs(dx) > 40) {
-      if (dx < 0) {
-        setActive((prev) => (prev + 1) % total);
-      } else {
-        setActive((prev) => (prev - 1 + total) % total);
-      }
+      setActive((prev) => dx < 0 ? (prev + 1) % total : (prev - 1 + total) % total);
     }
     dragRef.current = null;
   };
@@ -239,13 +352,10 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
         transition: "background 1.2s cubic-bezier(0.23, 1, 0.32, 1)",
       }}
     >
-      {/* Summer: animated wave layers behind gallery */}
       {isSummer && <SummerWaves active={inView} />}
-
-      {/* Seasonal particles */}
       <SeasonalParticles season={collection.seasonKey} active={inView} />
 
-      {/* Background text — BEHIND images */}
+      {/* Background text — behind images */}
       <div
         aria-hidden="true"
         style={{
@@ -291,7 +401,7 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
         </span>
       </div>
 
-      {/* ─── FLOATING 3D Carousel container ─── */}
+      {/* Floating 3D Carousel */}
       <div
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -306,62 +416,26 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
           perspectiveOrigin: "50% 50%",
           cursor: "grab",
           userSelect: "none",
-          // Apply the spring float to the whole carousel group
           transform: `translateY(${floatY}px) rotate(${floatRot}deg)`,
           transition: "transform 0.1s linear",
         }}
       >
-        {collection.images.map((img, i) => {
-          const offset = i - active;
-          const wrappedOffset = offset > total / 2 ? offset - total : offset < -total / 2 ? offset + total : offset;
-          const isActive = i === active;
-          const translateX = wrappedOffset * 50;
-          const translateZ = isActive ? 0 : -150 - Math.abs(wrappedOffset) * 30;
-          const rotateY = wrappedOffset * -12;
-          const opacity = Math.abs(wrappedOffset) > 2 ? 0 : isActive ? 1 : 0.5 - Math.abs(wrappedOffset) * 0.15;
-          const scale = isActive ? 1 : 0.82 - Math.abs(wrappedOffset) * 0.05;
-
-          // Each card also gets a subtle individual float offset for organic feel
-          const cardFloatOffset = Math.sin(Date.now() * 0.001 + i * 1.2) * 4;
-
-          return (
-            <div
-              key={i}
-              onClick={() => { if (!isDragging.current) setActive(i); }}
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                width: "clamp(240px, 36vw, 380px)",
-                aspectRatio: "3/4",
-                transform: `translate(-50%, calc(-50% + ${isActive ? 0 : cardFloatOffset}px)) translateX(${translateX}%) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
-                opacity: Math.max(0, opacity),
-                transition: "transform 800ms cubic-bezier(0.23, 1, 0.32, 1), opacity 800ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 400ms",
-                cursor: isActive ? "grab" : "pointer",
-                zIndex: isActive ? 10 : 5 - Math.abs(wrappedOffset),
-                boxShadow: isActive
-                  ? "0 40px 100px rgba(0,0,0,0.18), 0 8px 30px rgba(0,0,0,0.10)"
-                  : "0 10px 40px rgba(0,0,0,0.08)",
-              }}
-            >
-              <img
-                src={img}
-                alt={`${collection.season} collection look ${i + 1}`}
-                draggable={false}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  display: "block",
-                  pointerEvents: "none",
-                }}
-              />
-            </div>
-          );
-        })}
+        {collection.images.map((img, i) => (
+          <CollectionCard
+            key={i}
+            img={img}
+            season={collection.season}
+            index={i}
+            active={active}
+            total={total}
+            onClick={() => setActive(i)}
+            isDragging={isDragging}
+            floatY={floatY}
+          />
+        ))}
       </div>
 
-      {/* Foreground text — IN FRONT of images */}
+      {/* Foreground text — in front of images */}
       <div
         aria-hidden="true"
         style={{
@@ -453,25 +527,20 @@ export default function Home() {
     setCurrent((prev) => (prev - 1 + finalists.length) % finalists.length);
   }, []);
 
-  // Auto-advance hero
   useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(goNext, 5000);
     return () => clearInterval(interval);
   }, [goNext, isPaused]);
 
-  // Hero float
-  const { floatY: heroFloatY } = useSpringFloat(true);
-
+  const { floatY: heroFloatY } = useOrganicFloat(true);
   const finalist = finalists[current];
 
   return (
     <div className="page-enter" style={{ minHeight: "100vh" }}>
       <Navigation />
 
-      {/* ═══════════════════════════════════════════════════════
-          SECTION 1: Hero — Full-screen with rotating finalists
-          ═══════════════════════════════════════════════════════ */}
+      {/* Hero */}
       <section
         style={{
           position: "relative",
@@ -480,7 +549,6 @@ export default function Home() {
           background: "#faf8f5",
         }}
       >
-        {/* Background typographic text */}
         <div
           aria-hidden="true"
           style={{
@@ -514,7 +582,6 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Portrait carousel — floating */}
         <div
           style={{
             position: "absolute",
@@ -558,7 +625,6 @@ export default function Home() {
           })}
         </div>
 
-        {/* Finalist label */}
         <div
           style={{
             position: "absolute",
@@ -596,7 +662,6 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Controls */}
         <div
           style={{
             position: "absolute",
@@ -609,26 +674,23 @@ export default function Home() {
             gap: "1.5rem",
           }}
         >
-          <button onClick={goPrev} aria-label="Previous finalist" style={{ fontFamily: "'Bodoni Moda', serif", fontSize: 11, letterSpacing: "0.2em", opacity: 0.45, background: "none", border: "none", color: "inherit", padding: "0.25rem" }}>←</button>
+          <button onClick={goPrev} aria-label="Previous" style={{ fontFamily: "'Bodoni Moda', serif", fontSize: 11, letterSpacing: "0.2em", opacity: 0.45, background: "none", border: "none", color: "inherit", padding: "0.25rem" }}>←</button>
           <span style={{ fontFamily: "'Bodoni Moda', serif", fontSize: 9, letterSpacing: "0.35em", opacity: 0.35 }}>
             {current + 1} / {finalists.length}
           </span>
-          <button onClick={goNext} aria-label="Next finalist" style={{ fontFamily: "'Bodoni Moda', serif", fontSize: 11, letterSpacing: "0.2em", opacity: 0.45, background: "none", border: "none", color: "inherit", padding: "0.25rem" }}>→</button>
-          <button onClick={() => setIsPaused((p) => !p)} aria-label={isPaused ? "Resume slideshow" : "Pause slideshow"} style={{ fontFamily: "'Bodoni Moda', serif", fontSize: 9, letterSpacing: "0.35em", textTransform: "uppercase", opacity: 0.5, background: "none", border: "none", color: "inherit", padding: "0.25rem" }}>
+          <button onClick={goNext} aria-label="Next" style={{ fontFamily: "'Bodoni Moda', serif", fontSize: 11, letterSpacing: "0.2em", opacity: 0.45, background: "none", border: "none", color: "inherit", padding: "0.25rem" }}>→</button>
+          <button onClick={() => setIsPaused((p) => !p)} aria-label={isPaused ? "Resume" : "Pause"} style={{ fontFamily: "'Bodoni Moda', serif", fontSize: 9, letterSpacing: "0.35em", textTransform: "uppercase", opacity: 0.5, background: "none", border: "none", color: "inherit", padding: "0.25rem" }}>
             {isPaused ? "▶" : "⏸"}
           </button>
         </div>
 
-        {/* Scroll indicator */}
         <div style={{ position: "absolute", bottom: "1.5rem", left: "50%", transform: "translateX(-50%)", zIndex: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", opacity: 0.4, animation: "floatDown 2s ease-in-out infinite" }}>
           <span className="label-caps-sm">SCROLL</span>
           <div style={{ width: 1, height: 24, background: "rgba(0,0,0,0.3)" }} />
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════
-          SECTION 2: Intro text
-          ═══════════════════════════════════════════════════════ */}
+      {/* Intro */}
       <section style={{ padding: "10rem 0", background: "#fff" }}>
         <RevealSection>
           <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 2rem", textAlign: "center" }}>
@@ -641,16 +703,12 @@ export default function Home() {
         </RevealSection>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════
-          SECTION 3-5: Collection Carousels (Spring, Summer, Fall)
-          ═══════════════════════════════════════════════════════ */}
+      {/* Collection Carousels */}
       {collections.map((col, i) => (
         <CollectionCarousel key={col.season} collection={col} index={i} />
       ))}
 
-      {/* ═══════════════════════════════════════════════════════
-          SECTION 6: About Me
-          ═══════════════════════════════════════════════════════ */}
+      {/* About Me */}
       <section style={{ padding: "8rem 0", background: "#fff", borderTop: "0.5px solid rgba(0,0,0,0.08)" }}>
         <RevealSection>
           <div style={{ maxWidth: 700, margin: "0 auto", padding: "0 2rem", textAlign: "center" }}>
@@ -680,11 +738,10 @@ export default function Home() {
             >
               Lotius is a creative expression born from the intersection of art, fashion,
               and culture. Each collection tells a story — from the delicate bloom of spring
-              to the rich warmth of autumn. We believe in the power of design to transform,
+              to the glacial stillness of winter. We believe in the power of design to transform,
               inspire, and connect people across the world.
             </p>
 
-            {/* Instagram link */}
             <a
               href="https://www.instagram.com/i.cxccc?igsh=MTUxYm45amdsdmo3bw%3D%3D&utm_source=qr"
               target="_blank"
@@ -731,9 +788,7 @@ export default function Home() {
         </RevealSection>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════
-          SECTION 7: CTA / Explore
-          ═══════════════════════════════════════════════════════ */}
+      {/* CTA */}
       <section style={{ padding: "8rem 0", background: "#faf8f5" }}>
         <RevealSection>
           <div style={{ textAlign: "center" }}>
@@ -749,7 +804,7 @@ export default function Home() {
                 <button className="btn-lotius">DISCOVER THE AWARD →</button>
               </Link>
               <Link href="/laureates">
-                <button className="btn-lotius">VIEW LAUREATES →</button>
+                <button className="btn-lotius-ghost">VIEW LAUREATES →</button>
               </Link>
             </div>
           </div>
@@ -757,17 +812,6 @@ export default function Home() {
       </section>
 
       <Footer />
-
-      <style>{`
-        @keyframes floatDown {
-          0%, 100% { transform: translateX(-50%) translateY(0); }
-          50% { transform: translateX(-50%) translateY(8px); }
-        }
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }
