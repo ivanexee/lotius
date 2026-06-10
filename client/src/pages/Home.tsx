@@ -1,72 +1,328 @@
 /**
  * Home — Lotius
- * Design: Full-screen hero with rotating designer portraits
- * Large typographic overlay: "2026 LOTIUS AWARD FINALISTS"
- * ENTER → button centered on active portrait
- * Bottom bar: designer name + navigation controls
+ * Design: Smooth scroll-driven experience (no Enter gate)
+ * - Hero section with auto-rotating finalists + large background text
+ * - Spring / Summer / Fall collection sections as 3D carousels
+ *   with large typographic text layered behind AND in front of images
+ * - Fixed smooth scrolling motion throughout
  */
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "wouter";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 
+/* ─── Data ─── */
 const finalists = [
   {
     id: 1,
     name: "ELARA VOSS",
     brand: "by Elara Voss",
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_hero_1-WeiDQC86h9VwSYYn4MZQL4.webp",
-    bgColor: "#f5ede6",
   },
   {
     id: 2,
     name: "MARCO DELACROIX",
     brand: "by Marco Delacroix",
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_hero_2-ikWiuC6TeVwsBY6cDMSycB.webp",
-    bgColor: "#e8ddd5",
   },
   {
     id: 3,
     name: "SEREN NAKAMURA",
     brand: "by Seren Nakamura",
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_hero_3-bhCK7gbsg9tGBiakXFZzFb.webp",
-    bgColor: "#ebebeb",
   },
   {
     id: 4,
     name: "YUI TANAKA",
     brand: "by Yui Tanaka",
     image: "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_hero_4-gmt7chQWnUAwoEKjADFzcS.webp",
-    bgColor: "#1a1a1a",
   },
 ];
 
+const collections = [
+  {
+    season: "SPRING",
+    year: "2026",
+    subtitle: "Ephemeral Bloom",
+    images: [
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_spring_1-ijPg7iU3QnhdEjyMcixuwD.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_spring_2-jxukn5mApUGppWXkTvYsuM.webp",
+    ],
+  },
+  {
+    season: "SUMMER",
+    year: "2026",
+    subtitle: "Azure Meridian",
+    images: [
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_summer_1-44dMeJXFkLUfeJM7U3FCrc.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_summer_2-362jnR6ddyKSU6G5SKpZHr.webp",
+    ],
+  },
+  {
+    season: "FALL",
+    year: "2026",
+    subtitle: "Amber Reverie",
+    images: [
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_fall_1-StcMkgsqPMudxk9GEgzvW4.webp",
+      "https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_fall_2-egqQEdUWRTBzfrpxJJXWeT.webp",
+    ],
+  },
+];
+
+/* ─── Hooks ─── */
+function useReveal() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add("visible");
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.12 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  return ref;
+}
+
+function RevealSection({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const ref = useReveal();
+  return (
+    <div ref={ref} className={`reveal ${className}`} style={{ transitionDelay: `${delay}ms` }}>
+      {children}
+    </div>
+  );
+}
+
+/* ─── 3D Collection Carousel ─── */
+function CollectionCarousel({ collection, index }: { collection: typeof collections[0]; index: number }) {
+  const [active, setActive] = useState(0);
+  const total = collection.images.length;
+  const isEven = index % 2 === 0;
+
+  // Auto-advance
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActive((prev) => (prev + 1) % total);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [total]);
+
+  return (
+    <section
+      className="collection-section"
+      style={{
+        position: "relative",
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "hidden",
+        padding: "6rem 0",
+      }}
+    >
+      {/* Background text — BEHIND images */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: isEven ? "flex-start" : "flex-end",
+          pointerEvents: "none",
+          zIndex: 1,
+          padding: "0 3vw",
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "'Bodoni Moda', serif",
+            fontWeight: 400,
+            fontSize: "clamp(100px, 22vw, 320px)",
+            letterSpacing: "-0.03em",
+            lineHeight: 0.85,
+            color: "rgba(0,0,0,0.04)",
+            whiteSpace: "nowrap",
+            userSelect: "none",
+          }}
+        >
+          {collection.season}
+        </span>
+        <span
+          style={{
+            fontFamily: "'Bodoni Moda', serif",
+            fontWeight: 400,
+            fontSize: "clamp(40px, 8vw, 100px)",
+            letterSpacing: "0.1em",
+            lineHeight: 1,
+            color: "rgba(0,0,0,0.03)",
+            whiteSpace: "nowrap",
+            userSelect: "none",
+            marginTop: "-1rem",
+          }}
+        >
+          {collection.year}
+        </span>
+      </div>
+
+      {/* 3D Carousel container */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 2,
+          width: "100%",
+          maxWidth: "900px",
+          height: "clamp(400px, 70vh, 700px)",
+          perspective: "1200px",
+          perspectiveOrigin: "50% 50%",
+        }}
+      >
+        {collection.images.map((img, i) => {
+          const offset = i - active;
+          const isActive = i === active;
+          const translateX = offset * 60;
+          const translateZ = isActive ? 0 : -180;
+          const rotateY = offset * -15;
+          const opacity = Math.abs(offset) > 1 ? 0 : isActive ? 1 : 0.55;
+          const scale = isActive ? 1 : 0.85;
+
+          return (
+            <div
+              key={i}
+              onClick={() => setActive(i)}
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                width: "clamp(260px, 40vw, 420px)",
+                aspectRatio: "3/4",
+                transform: `translate(-50%, -50%) translateX(${translateX}%) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
+                opacity,
+                transition: "all 800ms cubic-bezier(0.23, 1, 0.32, 1)",
+                cursor: isActive ? "default" : "pointer",
+                zIndex: isActive ? 10 : 5 - Math.abs(offset),
+                boxShadow: isActive ? "0 30px 80px rgba(0,0,0,0.15)" : "0 10px 40px rgba(0,0,0,0.08)",
+              }}
+            >
+              <img
+                src={img}
+                alt={`${collection.season} collection look ${i + 1}`}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
+                }}
+              />
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Foreground text — IN FRONT of images, partially visible */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: isEven ? "flex-end" : "flex-start",
+          pointerEvents: "none",
+          zIndex: 3,
+          padding: "0 4vw",
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "'Bodoni Moda', serif",
+            fontWeight: 400,
+            fontSize: "clamp(60px, 14vw, 200px)",
+            letterSpacing: "-0.02em",
+            lineHeight: 0.85,
+            color: "rgba(0,0,0,0.07)",
+            whiteSpace: "nowrap",
+            userSelect: "none",
+            mixBlendMode: "multiply",
+          }}
+        >
+          {collection.season}
+        </span>
+        <span
+          style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontWeight: 300,
+            fontSize: "clamp(14px, 2vw, 22px)",
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: "rgba(0,0,0,0.35)",
+            marginTop: "0.5rem",
+          }}
+        >
+          {collection.subtitle}
+        </span>
+      </div>
+
+      {/* Dot indicators */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "3rem",
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 4,
+          display: "flex",
+          gap: "0.75rem",
+          alignItems: "center",
+        }}
+      >
+        {collection.images.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setActive(i)}
+            aria-label={`View look ${i + 1}`}
+            style={{
+              width: i === active ? 24 : 6,
+              height: 6,
+              borderRadius: 3,
+              background: i === active ? "rgba(0,0,0,0.7)" : "rgba(0,0,0,0.15)",
+              border: "none",
+              transition: "all 400ms cubic-bezier(0.23,1,0.32,1)",
+              cursor: "pointer",
+            }}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ─── Main Component ─── */
 export default function Home() {
   const [current, setCurrent] = useState(0);
-  const [prev, setPrev] = useState<number | null>(null);
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
   const goTo = useCallback((index: number) => {
-    if (isTransitioning || index === current) return;
-    setIsTransitioning(true);
-    setPrev(current);
     setCurrent(index);
-    setTimeout(() => {
-      setPrev(null);
-      setIsTransitioning(false);
-    }, 900);
-  }, [current, isTransitioning]);
+  }, []);
 
   const goNext = useCallback(() => {
-    goTo((current + 1) % finalists.length);
-  }, [current, goTo]);
+    setCurrent((prev) => (prev + 1) % finalists.length);
+  }, []);
 
   const goPrev = useCallback(() => {
-    goTo((current - 1 + finalists.length) % finalists.length);
-  }, [current, goTo]);
+    setCurrent((prev) => (prev - 1 + finalists.length) % finalists.length);
+  }, []);
 
-  // Auto-advance
+  // Auto-advance hero
   useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(goNext, 5000);
@@ -74,29 +330,20 @@ export default function Home() {
   }, [goNext, isPaused]);
 
   const finalist = finalists[current];
-  const isDark = finalist.bgColor === "#1a1a1a";
 
   return (
-    <div
-      className="page-enter"
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        color: isDark ? "#fff" : "#000",
-      }}
-    >
+    <div className="page-enter" style={{ minHeight: "100vh" }}>
       <Navigation />
 
-      {/* Hero */}
-      <main
+      {/* ═══════════════════════════════════════════════════════
+          SECTION 1: Hero — Full-screen with rotating finalists
+          ═══════════════════════════════════════════════════════ */}
+      <section
         style={{
           position: "relative",
-          flex: 1,
-          minHeight: "100vh",
+          height: "100vh",
           overflow: "hidden",
-          background: finalist.bgColor,
-          transition: "background 800ms cubic-bezier(0.23,1,0.32,1)",
+          background: "#faf8f5",
         }}
       >
         {/* Background typographic text */}
@@ -120,7 +367,7 @@ export default function Home() {
               fontSize: "clamp(80px, 18vw, 220px)",
               letterSpacing: "-0.02em",
               lineHeight: 0.9,
-              color: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
+              color: "rgba(0,0,0,0.05)",
               whiteSpace: "nowrap",
               paddingLeft: "2vw",
               userSelect: "none",
@@ -135,7 +382,7 @@ export default function Home() {
               fontSize: "clamp(60px, 14vw, 180px)",
               letterSpacing: "-0.02em",
               lineHeight: 0.9,
-              color: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
+              color: "rgba(0,0,0,0.05)",
               whiteSpace: "nowrap",
               paddingLeft: "2vw",
               userSelect: "none",
@@ -150,7 +397,7 @@ export default function Home() {
               fontSize: "clamp(40px, 9vw, 120px)",
               letterSpacing: "-0.02em",
               lineHeight: 0.9,
-              color: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
+              color: "rgba(0,0,0,0.05)",
               whiteSpace: "nowrap",
               paddingLeft: "2vw",
               userSelect: "none",
@@ -165,7 +412,7 @@ export default function Home() {
               fontSize: "clamp(30px, 7vw, 90px)",
               letterSpacing: "-0.02em",
               lineHeight: 0.9,
-              color: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
+              color: "rgba(0,0,0,0.05)",
               whiteSpace: "nowrap",
               paddingLeft: "2vw",
               userSelect: "none",
@@ -175,7 +422,7 @@ export default function Home() {
           </span>
         </div>
 
-        {/* Portrait cards */}
+        {/* Portrait cards — 3D perspective */}
         <div
           style={{
             position: "absolute",
@@ -184,111 +431,42 @@ export default function Home() {
             alignItems: "center",
             justifyContent: "center",
             zIndex: 2,
+            perspective: "1000px",
           }}
         >
-          {/* Previous portrait (fading out) */}
-          {prev !== null && (
-            <div
-              key={`prev-${prev}`}
-              style={{
-                position: "absolute",
-                width: "clamp(220px, 35vw, 420px)",
-                aspectRatio: "3/4",
-                opacity: 0,
-                transition: "opacity 800ms cubic-bezier(0.23,1,0.32,1)",
-              }}
-            >
-              <img
-                src={finalists[prev].image}
-                alt={finalists[prev].name}
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            </div>
-          )}
+          {finalists.map((f, i) => {
+            const offset = i - current;
+            const isActive = i === current;
+            const translateX = offset * 55;
+            const translateZ = isActive ? 0 : -150;
+            const rotateY = offset * -12;
+            const opacity = Math.abs(offset) > 1 ? 0.15 : isActive ? 1 : 0.4;
+            const scale = isActive ? 1 : 0.78;
 
-          {/* Current portrait */}
-          <div
-            key={`curr-${current}`}
-            style={{
-              position: "relative",
-              width: "clamp(220px, 35vw, 420px)",
-              aspectRatio: "3/4",
-              animation: "portraitIn 900ms cubic-bezier(0.23,1,0.32,1) both",
-            }}
-          >
-            <img
-              src={finalist.image}
-              alt={finalist.name}
-              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-            />
-            {/* Enter button overlay */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: "2rem",
-                left: "50%",
-                transform: "translateX(-50%)",
-              }}
-            >
-              <Link href="/laureates">
-                <button className={isDark ? "btn-lotius-inv" : "btn-lotius"}>
-                  ENTER →
-                </button>
-              </Link>
-            </div>
-          </div>
-
-          {/* Left side preview */}
-          {(() => {
-            const prevIdx = (current - 1 + finalists.length) % finalists.length;
-            const f = finalists[prevIdx];
             return (
               <div
-                key={`left-${prevIdx}`}
-                onClick={() => goTo(prevIdx)}
+                key={f.id}
+                onClick={() => !isActive && goTo(i)}
                 style={{
                   position: "absolute",
-                  left: "clamp(20px, 6vw, 100px)",
-                  width: "clamp(100px, 15vw, 200px)",
+                  width: "clamp(200px, 32vw, 380px)",
                   aspectRatio: "3/4",
-                  opacity: 0.3,
-                  transform: "rotate(-2deg)",
-                  transition: "opacity 300ms, transform 300ms",
-                  cursor: "pointer",
+                  transform: `translateX(${translateX}%) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
+                  opacity,
+                  transition: "all 900ms cubic-bezier(0.23, 1, 0.32, 1)",
+                  cursor: isActive ? "default" : "pointer",
+                  zIndex: isActive ? 10 : 5 - Math.abs(offset),
+                  boxShadow: isActive ? "0 40px 100px rgba(0,0,0,0.12)" : "none",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.6"; e.currentTarget.style.transform = "rotate(-1deg) scale(1.02)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.3"; e.currentTarget.style.transform = "rotate(-2deg)"; }}
               >
-                <img src={f.image} alt={f.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <img
+                  src={f.image}
+                  alt={f.name}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                />
               </div>
             );
-          })()}
-
-          {/* Right side preview */}
-          {(() => {
-            const nextIdx = (current + 1) % finalists.length;
-            const f = finalists[nextIdx];
-            return (
-              <div
-                key={`right-${nextIdx}`}
-                onClick={() => goTo(nextIdx)}
-                style={{
-                  position: "absolute",
-                  right: "clamp(20px, 6vw, 100px)",
-                  width: "clamp(100px, 15vw, 200px)",
-                  aspectRatio: "3/4",
-                  opacity: 0.3,
-                  transform: "rotate(2deg)",
-                  transition: "opacity 300ms, transform 300ms",
-                  cursor: "pointer",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.6"; e.currentTarget.style.transform = "rotate(1deg) scale(1.02)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.3"; e.currentTarget.style.transform = "rotate(2deg)"; }}
-              >
-                <img src={f.image} alt={f.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              </div>
-            );
-          })()}
+          })}
         </div>
 
         {/* Bottom bar */}
@@ -302,11 +480,10 @@ export default function Home() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "1.5rem",
-            borderTop: `0.5px solid ${isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)"}`,
+            padding: "1.5rem 2rem",
+            borderTop: "0.5px solid rgba(0,0,0,0.1)",
           }}
         >
-          {/* Finalist selector */}
           <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
             <button
               onClick={goPrev}
@@ -345,7 +522,6 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Current finalist name */}
           <div style={{ textAlign: "center" }}>
             <p
               style={{
@@ -364,7 +540,6 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Pause/play */}
           <button
             onClick={() => setIsPaused((p) => !p)}
             aria-label={isPaused ? "Resume slideshow" : "Pause slideshow"}
@@ -383,12 +558,110 @@ export default function Home() {
             {isPaused ? "▶" : "⏸"}
           </button>
         </div>
-      </main>
+
+        {/* Scroll indicator */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "5rem",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 4,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "0.5rem",
+            opacity: 0.4,
+            animation: "floatDown 2s ease-in-out infinite",
+          }}
+        >
+          <span className="label-caps-sm">SCROLL</span>
+          <div style={{ width: 1, height: 24, background: "rgba(0,0,0,0.3)" }} />
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          SECTION 2: Intro text
+          ═══════════════════════════════════════════════════════ */}
+      <section style={{ padding: "10rem 0", background: "#fff" }}>
+        <RevealSection>
+          <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 2rem", textAlign: "center" }}>
+            <p
+              style={{
+                fontFamily: "'Bodoni Moda', serif",
+                fontWeight: 400,
+                fontSize: "clamp(18px, 3vw, 28px)",
+                letterSpacing: "0.04em",
+                lineHeight: 1.6,
+                color: "rgba(0,0,0,0.8)",
+              }}
+            >
+              THE LOTIUS AWARD WAS CREATED TO CELEBRATE AND SUPPORT CREATIVE
+              TALENT FROM AROUND THE WORLD. EACH SEASON, WE PRESENT COLLECTIONS
+              THAT DEFINE THE FUTURE OF FASHION.
+            </p>
+          </div>
+        </RevealSection>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          SECTION 3-5: Collection Carousels (Spring, Summer, Fall)
+          ═══════════════════════════════════════════════════════ */}
+      {collections.map((col, i) => (
+        <RevealSection key={col.season} delay={i * 100}>
+          <CollectionCarousel collection={col} index={i} />
+        </RevealSection>
+      ))}
+
+      {/* ═══════════════════════════════════════════════════════
+          SECTION 6: CTA / Explore
+          ═══════════════════════════════════════════════════════ */}
+      <section style={{ padding: "8rem 0", background: "#fff" }}>
+        <RevealSection>
+          <div style={{ textAlign: "center" }}>
+            <h2
+              style={{
+                fontFamily: "'Bodoni Moda', serif",
+                fontWeight: 400,
+                fontSize: "clamp(32px, 6vw, 64px)",
+                letterSpacing: "-0.02em",
+                marginBottom: "2rem",
+              }}
+            >
+              Explore the Award
+            </h2>
+            <p
+              style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontWeight: 300,
+                fontSize: "clamp(14px, 1.8vw, 18px)",
+                lineHeight: 1.7,
+                maxWidth: 600,
+                margin: "0 auto 3rem",
+                color: "rgba(0,0,0,0.6)",
+              }}
+            >
+              Discover the laureates, meet the council, and learn about our
+              commitment to nurturing the next generation of fashion visionaries.
+            </p>
+            <div style={{ display: "flex", gap: "1.5rem", justifyContent: "center", flexWrap: "wrap" }}>
+              <Link href="/discover">
+                <button className="btn-lotius">DISCOVER THE AWARD →</button>
+              </Link>
+              <Link href="/laureates">
+                <button className="btn-lotius">VIEW LAUREATES →</button>
+              </Link>
+            </div>
+          </div>
+        </RevealSection>
+      </section>
+
+      <Footer />
 
       <style>{`
-        @keyframes portraitIn {
-          from { opacity: 0; transform: scale(0.97); }
-          to { opacity: 1; transform: scale(1); }
+        @keyframes floatDown {
+          0%, 100% { transform: translateX(-50%) translateY(0); }
+          50% { transform: translateX(-50%) translateY(8px); }
         }
       `}</style>
     </div>
