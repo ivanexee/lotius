@@ -5,34 +5,51 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
-
+import Discover from "./pages/Discover";
+import Laureates from "./pages/Laureates";
+import Council from "./pages/Council";
+import Mentors from "./pages/Mentors";
+import LoadingScreen from "./components/LoadingScreen";
+import { useState, useEffect } from "react";
 
 function Router() {
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
+      <Route path="/" component={Home} />
+      <Route path="/discover" component={Discover} />
+      <Route path="/laureates" component={Laureates} />
+      <Route path="/council" component={Council} />
+      <Route path="/mentors" component={Mentors} />
+      <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
+  const hasSeenLoading = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('lotius_loaded');
+  const [loading, setLoading] = useState(!hasSeenLoading);
+  const [fadeOut, setFadeOut] = useState(false);
+
+  useEffect(() => {
+    if (hasSeenLoading) return;
+    const timer = setTimeout(() => {
+      setFadeOut(true);
+      setTimeout(() => {
+        setLoading(false);
+        sessionStorage.setItem('lotius_loaded', '1');
+      }, 700);
+    }, 5800);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
-          <Router />
+          {loading && <LoadingScreen fadeOut={fadeOut} />}
+          {!loading && <Router />}
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
