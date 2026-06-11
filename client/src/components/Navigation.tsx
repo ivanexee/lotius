@@ -59,7 +59,7 @@ export default function Navigation() {
 
       <header
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
-        style={{ padding: "1.25rem 1.5rem" }}
+        style={{ padding: "1.25rem 1.5rem", color: "#fff", mixBlendMode: "difference" as const }}
       >
         {/* Hamburger / X toggle */}
         <button

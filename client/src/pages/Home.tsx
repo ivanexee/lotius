@@ -546,7 +546,7 @@ export default function Home() {
           position: "relative",
           height: "100vh",
           overflow: "hidden",
-          background: "#faf8f5",
+          background: "#080808",
         }}
       >
         <div
@@ -562,7 +562,7 @@ export default function Home() {
             overflow: "hidden",
           }}
         >
-          {["2026", "LOTIUS", "AWARD", "FINALISTS"].map((word, i) => (
+          {["LOTIUS", "COLLECTIONS", "2026", "SOON"].map((word, i) => (
             <span
               key={word}
               style={{
@@ -571,7 +571,7 @@ export default function Home() {
                 fontSize: i === 0 ? "clamp(80px, 18vw, 220px)" : "clamp(60px, 14vw, 180px)",
                 letterSpacing: "-0.02em",
                 lineHeight: 0.9,
-                color: "rgba(0,0,0,0.05)",
+                color: "rgba(255,255,255,0.06)",
                 whiteSpace: "nowrap",
                 paddingLeft: "2vw",
                 userSelect: "none",
@@ -628,11 +628,12 @@ export default function Home() {
         <div
           style={{
             position: "absolute",
-            bottom: "8rem",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 4,
-            textAlign: "center",
+          bottom: "8rem",
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 4,
+          textAlign: "center",
+          mixBlendMode: "normal" as const,
           }}
         >
           <p
@@ -685,16 +686,16 @@ export default function Home() {
         </div>
 
         <div style={{ position: "absolute", bottom: "1.5rem", left: "50%", transform: "translateX(-50%)", zIndex: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", opacity: 0.4, animation: "floatDown 2s ease-in-out infinite" }}>
-          <span className="label-caps-sm">SCROLL</span>
-          <div style={{ width: 1, height: 24, background: "rgba(0,0,0,0.3)" }} />
+          <span className="label-caps-sm" style={{ color: "rgba(255,255,255,0.5)" }}>SCROLL</span>
+          <div style={{ width: 1, height: 24, background: "rgba(255,255,255,0.3)" }} />
         </div>
       </section>
 
       {/* Intro */}
-      <section style={{ padding: "10rem 0", background: "#fff" }}>
+      <section style={{ padding: "10rem 0", background: "#0d0d0d" }}>
         <RevealSection>
           <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 2rem", textAlign: "center" }}>
-            <p style={{ fontFamily: "'Bodoni Moda', serif", fontWeight: 400, fontSize: "clamp(18px, 3vw, 28px)", letterSpacing: "0.04em", lineHeight: 1.6, color: "rgba(0,0,0,0.8)" }}>
+            <p style={{ fontFamily: "'Bodoni Moda', serif", fontWeight: 400, fontSize: "clamp(18px, 3vw, 28px)", letterSpacing: "0.04em", lineHeight: 1.6, color: "rgba(255,255,255,0.75)" }}>
               THE LOTIUS AWARD WAS CREATED TO CELEBRATE AND SUPPORT CREATIVE
               TALENT FROM AROUND THE WORLD. EACH SEASON, WE PRESENT COLLECTIONS
               THAT DEFINE THE FUTURE OF FASHION.
