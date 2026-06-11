@@ -784,9 +784,7 @@ export default function Home() {
         <RevealSection>
           <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 2rem", textAlign: "center" }}>
             <p style={{ fontFamily: "'Bodoni Moda', serif", fontWeight: 400, fontSize: "clamp(18px, 3vw, 28px)", letterSpacing: "0.04em", lineHeight: 1.6, color: "rgba(255,255,255,0.75)" }}>
-              THE LOTIUS AWARD WAS CREATED TO CELEBRATE AND SUPPORT CREATIVE
-              TALENT FROM AROUND THE WORLD. EACH SEASON, WE PRESENT COLLECTIONS
-              THAT DEFINE THE FUTURE OF FASHION.
+              Add inspiration and idea planning here- later.
             </p>
           </div>
         </RevealSection>
@@ -825,10 +823,7 @@ export default function Home() {
                 marginBottom: "3rem",
               }}
             >
-              Lotius is a creative expression born from the intersection of art, fashion,
-              and culture. Each collection tells a story — from the delicate bloom of spring
-              to the glacial stillness of winter. We believe in the power of design to transform,
-              inspire, and connect people across the world.
+                            creativity behind it, clothing inspo, etc.
             </p>
 
             <a
@@ -882,7 +877,7 @@ export default function Home() {
         <RevealSection>
           <div style={{ textAlign: "center" }}>
             <h2 style={{ fontFamily: "'Bodoni Moda', serif", fontWeight: 400, fontSize: "clamp(32px, 6vw, 64px)", letterSpacing: "-0.02em", marginBottom: "2rem" }}>
-              Explore the Award
+              Empower the confidence
             </h2>
             <p style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "clamp(14px, 1.8vw, 18px)", lineHeight: 1.7, maxWidth: 600, margin: "0 auto 3rem", color: "rgba(0,0,0,0.6)" }}>
               Discover the laureates, meet the council, and learn about our
@@ -890,7 +885,7 @@ export default function Home() {
             </p>
             <div style={{ display: "flex", gap: "1.5rem", justifyContent: "center", flexWrap: "wrap" }}>
               <Link href="/discover">
-                <button className="btn-lotius">DISCOVER THE AWARD →</button>
+                <button className="btn-lotius">Discover your taste→</button>
               </Link>
               <Link href="/laureates">
                 <button className="btn-lotius-ghost">VIEW LAUREATES →</button>
