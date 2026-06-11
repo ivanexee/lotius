@@ -1,6 +1,6 @@
 /**
  * Discover — Lotius
- * Design: Mission statement, awards breakdown, timeline, mentorship
+ * Design: Mission statement, materials breakdown, timeline, team section
  * Generous whitespace, hairline dividers, scroll-reveal animations
  */
 import { useEffect, useRef } from "react";
@@ -9,39 +9,35 @@ import Footer from "@/components/Footer";
 
 const awards = [
   {
-    title: "THE LOTIUS AWARD",
-    description:
-      "The winner of the Lotius Award receives a €400,000 endowment and is mentored for one year by a team of Lotius experts across sustainable development, communication, legal, marketing, and finance.",
+    title: "fabric title",
+    description: "Material #1",
   },
   {
-    title: "THE CRAFT PRIZE",
-    description:
-      "Created in 2022, the Craft Prize honours excellence in craftsmanship and technical innovation at the service of creativity. The winner receives a €200,000 allocation and a one-year mentorship.",
+    title: "add something here",
+    description: "add text here as well",
   },
   {
-    title: "THE INNOVATION PRIZE",
-    description:
-      "Launched in 2024, the Innovation Prize rewards pioneering approaches to materials, process, and sustainability. The winner receives a €200,000 allocation and a one-year mentorship.",
+    title: "something here",
+    description: "add text here as well",
   },
   {
-    title: "THE GRADUATE AWARD",
-    description:
-      "The Lotius Award also distinguishes three young fashion school graduates. Each winner, along with their school, receives €10,000 and joins the design studio of a partner house for one year.",
+    title: "display",
+    description: "display",
   },
 ];
 
 const timeline = [
   {
     step: "SELECTION",
-    desc: "Each year, 20 semi-finalists are selected from online applications submitted by designers worldwide.",
+    desc: "describing our way to making this happen",
   },
   {
     step: "SEMI-FINAL",
-    desc: "During the semi-final, Mentors and Experts from the world of fashion choose the finalists.",
+    desc: "more explaining",
   },
   {
     step: "FINAL",
-    desc: "During the final ceremony, Council members deliberate and select the award winners.",
+    desc: "how it became a reality",
   },
 ];
 
@@ -101,17 +97,14 @@ export default function Discover() {
                 color: "oklch(0.08 0 0)",
               }}
             >
-              THE LOTIUS AWARD WAS CREATED IN 2013 TO CELEBRATE AND SUPPORT
-              CREATIVE TALENT FROM AROUND THE WORLD. THIS COMPETITION IS OPEN
-              TO ALL DESIGNERS AGED 18 TO 40 WHO HAVE CREATED AT LEAST TWO
-              READY-TO-WEAR COLLECTIONS.
+              Fabrics? about me?
             </p>
           </RevealSection>
         </section>
 
         <hr className="hairline" style={{ maxWidth: 1440, margin: "0 auto" }} />
 
-        {/* Awards section */}
+        {/* Materials section */}
         <section style={{ padding: "5rem 1.5rem", maxWidth: 1440, margin: "0 auto" }}>
           <RevealSection>
             <h2
@@ -124,7 +117,7 @@ export default function Discover() {
                 marginBottom: "3rem",
               }}
             >
-              The Awards
+              Here will list out the materials
             </h2>
           </RevealSection>
 
@@ -136,7 +129,7 @@ export default function Discover() {
             }}
           >
             {awards.map((award, i) => (
-              <RevealSection key={award.title} delay={i * 80}>
+              <RevealSection key={award.title + i} delay={i * 80}>
                 <div>
                   <h3
                     className="label-caps"
@@ -208,13 +201,13 @@ export default function Discover() {
               style={{
                 fontFamily: "'Bodoni Moda', serif",
                 fontWeight: 400,
-                fontSize: "clamp(32px, 5vw, 64px)",
+                fontSize: "15px",
                 letterSpacing: "0.05em",
                 textTransform: "uppercase",
                 marginBottom: "3rem",
               }}
             >
-              The Timeline
+              Here will add a timeline section explaining the journey
             </h2>
           </RevealSection>
 
@@ -264,14 +257,14 @@ export default function Discover() {
 
         <hr className="hairline" style={{ maxWidth: 1440, margin: "0 auto" }} />
 
-        {/* Supporting young talent */}
+        {/* Team / modeling section */}
         <section
           style={{
             padding: "5rem 1.5rem",
             maxWidth: 1440,
             margin: "0 auto",
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
+            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
             gap: "4rem",
             alignItems: "center",
           }}
@@ -282,14 +275,14 @@ export default function Discover() {
                 style={{
                   fontFamily: "'Bodoni Moda', serif",
                   fontWeight: 400,
-                  fontSize: "clamp(28px, 4vw, 52px)",
+                  fontSize: "14px",
                   letterSpacing: "0.03em",
                   textTransform: "uppercase",
                   marginBottom: "1.5rem",
                   lineHeight: 1.1,
                 }}
               >
-                Supporting Young Talent
+                i was thinking here will add the people modeling or just myself along with coworkers
               </h2>
               <p
                 style={{
@@ -301,11 +294,7 @@ export default function Discover() {
                   marginBottom: "2rem",
                 }}
               >
-                Driven by a passion for creativity, Lotius launched its award in 2013.
-                This patronage embodies our commitment to today's young designers —
-                the talents of tomorrow. Through financial support, mentorship, and
-                access to our global network, we empower the next generation of
-                fashion visionaries.
+                describing ourselves and our inspo
               </p>
               <a href="/laureates" className="btn-lotius">
                 DISCOVER LAUREATES →
@@ -317,12 +306,12 @@ export default function Discover() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
               <img
                 src="https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_hero_1-WeiDQC86h9VwSYYn4MZQL4.webp"
-                alt="Finalist portrait"
+                alt="Portrait"
                 style={{ width: "100%", aspectRatio: "3/4", objectFit: "cover" }}
               />
               <img
                 src="https://d2xsxph8kpxj0f.cloudfront.net/310419663030255758/RcnPXDZTQnE94Vkt8qjKEi/lotius_hero_3-bhCK7gbsg9tGBiakXFZzFb.webp"
-                alt="Finalist portrait"
+                alt="Portrait"
                 style={{ width: "100%", aspectRatio: "3/4", objectFit: "cover", marginTop: "2rem" }}
               />
             </div>
