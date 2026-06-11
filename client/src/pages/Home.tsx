@@ -718,17 +718,19 @@ export default function Home() {
       {/* About Me */}
       <section style={{ padding: "clamp(4rem, 8vw, 8rem) 0", background: "#fff", borderTop: "0.5px solid rgba(0,0,0,0.08)" }}>
         <RevealSection>
-          <div style={{ maxWidth: 700, margin: "0 auto", padding: "0 clamp(1rem, 5vw, 2rem)", textAlign: "center" }}>
-            <span className="label-caps" style={{ opacity: 0.4, display: "block", marginBottom: "2rem" }}>
+          <div style={{ maxWidth: 640, margin: "0 auto", padding: "0 clamp(1rem, 5vw, 2rem)" }}>
+            <span className="label-caps" style={{ opacity: 0.4, display: "block", marginBottom: "1.5rem" }}>
               ABOUT THE DESIGNER
             </span>
             <h2
               style={{
                 fontFamily: "'Bodoni Moda', serif",
                 fontWeight: 400,
-                fontSize: "clamp(32px, 5vw, 52px)",
-                letterSpacing: "-0.01em",
-                marginBottom: "2rem",
+                fontSize: "clamp(28px, 4vw, 44px)",
+                letterSpacing: "0.02em",
+                textTransform: "uppercase",
+                marginBottom: "1.5rem",
+                lineHeight: 1.15,
               }}
             >
               The Vision Behind Lotius
@@ -737,10 +739,10 @@ export default function Home() {
               style={{
                 fontFamily: "'Cormorant Garamond', serif",
                 fontWeight: 300,
-                fontSize: "clamp(16px, 2vw, 20px)",
-                lineHeight: 1.8,
-                color: "rgba(0,0,0,0.65)",
-                marginBottom: "3rem",
+                fontSize: "clamp(16px, 1.8vw, 19px)",
+                lineHeight: 1.85,
+                color: "oklch(0.25 0 0)",
+                marginBottom: "2rem",
               }}
             >
               Lotius is a creative expression born from the intersection of art, fashion,
@@ -748,49 +750,30 @@ export default function Home() {
               to the glacial stillness of winter. We believe in the power of design to transform,
               inspire, and connect people across the world.
             </p>
-
             <a
               href="https://www.instagram.com/i.cxccc?igsh=MTUxYm45amdsdmo3bw%3D%3D&utm_source=qr"
               target="_blank"
               rel="noopener noreferrer"
+              className="label-caps"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                gap: "0.75rem",
-                fontFamily: "'Bodoni Moda', serif",
-                fontSize: 11,
-                letterSpacing: "0.3em",
-                textTransform: "uppercase",
-                color: "rgba(0,0,0,0.7)",
+                gap: "0.5rem",
+                color: "oklch(0.08 0 0)",
                 textDecoration: "none",
-                padding: "1rem 2rem",
-                border: "0.5px solid rgba(0,0,0,0.2)",
-                transition: "all 300ms cubic-bezier(0.23, 1, 0.32, 1)",
+                opacity: 0.7,
+                transition: "opacity 200ms",
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(0,0,0,0.9)";
-                e.currentTarget.style.color = "#fff";
-                e.currentTarget.style.borderColor = "rgba(0,0,0,0.9)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "transparent";
-                e.currentTarget.style.color = "rgba(0,0,0,0.7)";
-                e.currentTarget.style.borderColor = "rgba(0,0,0,0.2)";
-              }}
+              onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.7"; }}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
                 <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
                 <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
               </svg>
               @i.cxccc
             </a>
-
-            <div style={{ marginTop: "2rem" }}>
-              <p style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: 14, color: "rgba(0,0,0,0.4)", letterSpacing: "0.05em" }}>
-                Follow for behind-the-scenes, new collections, and creative inspiration.
-              </p>
-            </div>
           </div>
         </RevealSection>
       </section>

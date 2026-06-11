@@ -1,6 +1,6 @@
 /**
  * Footer — Lotius
- * Design: Minimal, hairline top border, small label caps
+ * Design: Concise, organized, hairline top border
  */
 import { Link } from "wouter";
 
@@ -8,26 +8,62 @@ export default function Footer() {
   return (
     <footer
       style={{
-        borderTop: "0.5px solid oklch(0.08 0 0 / 0.15)",
-        padding: "2rem 1.5rem",
+        borderTop: "0.5px solid oklch(0.08 0 0 / 0.12)",
+        padding: "clamp(1.5rem, 3vw, 2.5rem) clamp(1rem, 3vw, 1.5rem)",
         marginTop: "auto",
       }}
     >
       <div
-        className="flex flex-wrap items-center justify-between gap-4"
-        style={{ maxWidth: 1440, margin: "0 auto" }}
+        style={{
+          maxWidth: 1440,
+          margin: "0 auto",
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "1rem",
+        }}
       >
-        <div className="flex flex-wrap gap-6">
-          <a href="#" className="label-caps" style={{ opacity: 0.45 }}>Legal Terms</a>
-          <a href="#" className="label-caps" style={{ opacity: 0.45 }}>Terms &amp; Conditions</a>
-          <a href="#" className="label-caps" style={{ opacity: 0.45 }}>Personal Data</a>
-          <a href="#" className="label-caps" style={{ opacity: 0.45 }}>Accessibility</a>
-          <Link href="/discover">
-            <span className="label-caps" style={{ opacity: 0.45 }}>Sitemap</span>
-          </Link>
+        {/* Brand */}
+        <Link href="/">
+          <span
+            style={{
+              fontFamily: "'Bodoni Moda', serif",
+              fontWeight: 400,
+              fontSize: "clamp(12px, 1.5vw, 14px)",
+              letterSpacing: "0.35em",
+              textTransform: "uppercase",
+              textDecoration: "none",
+              color: "inherit",
+            }}
+          >
+            LOTIUS
+          </span>
+        </Link>
+
+        {/* Links */}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "clamp(1rem, 3vw, 2rem)",
+            alignItems: "center",
+          }}
+        >
+          <a href="#" className="label-caps" style={{ opacity: 0.4, textDecoration: "none", color: "inherit" }}>Privacy</a>
+          <a href="#" className="label-caps" style={{ opacity: 0.4, textDecoration: "none", color: "inherit" }}>Terms</a>
+          <a
+            href="mailto:i.cxc@icloud.com?subject=Lotius Enquiry"
+            className="label-caps"
+            style={{ opacity: 0.4, textDecoration: "none", color: "inherit" }}
+          >
+            Contact
+          </a>
         </div>
+
+        {/* Copyright */}
         <span className="label-caps" style={{ opacity: 0.3 }}>
-          © {new Date().getFullYear()} Lotius. All rights reserved.
+          © {new Date().getFullYear()} Lotius
         </span>
       </div>
     </footer>
