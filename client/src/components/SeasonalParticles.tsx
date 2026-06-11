@@ -199,7 +199,8 @@ export default function SeasonalParticles({ season, active }: SeasonalParticlesP
     resize();
     window.addEventListener("resize", resize);
 
-    const maxParticles = season === "winter" ? 40 : 25;
+    const isMobileDevice = window.innerWidth < 768;
+    const maxParticles = isMobileDevice ? (season === "winter" ? 18 : 12) : (season === "winter" ? 40 : 25);
     let frameCount = 0;
 
     const animate = () => {

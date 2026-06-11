@@ -271,8 +271,8 @@ export default function Discover() {
             maxWidth: 1440,
             margin: "0 auto",
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "4rem",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 380px), 1fr))",
+            gap: "clamp(2rem, 5vw, 4rem)",
             alignItems: "center",
           }}
         >

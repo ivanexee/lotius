@@ -83,10 +83,10 @@ function MemberCard({ member, delay }: { member: typeof members[0]; delay: numbe
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "2rem",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
+          gap: "clamp(1rem, 3vw, 2rem)",
           alignItems: "start",
-          padding: "2.5rem 0",
+          padding: "clamp(1.5rem, 3vw, 2.5rem) 0",
           borderBottom: "0.5px solid oklch(0.08 0 0 / 0.12)",
         }}
       >
