@@ -519,6 +519,20 @@ export default function Home() {
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
+  // Cursor spotlight state
+  const [spotlight, setSpotlight] = useState({ x: -9999, y: -9999, visible: false });
+  const heroRef = useRef<HTMLElement>(null);
+
+  const handleHeroMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const rect = heroRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setSpotlight({ x: e.clientX - rect.left, y: e.clientY - rect.top, visible: true });
+  }, []);
+
+  const handleHeroMouseLeave = useCallback(() => {
+    setSpotlight((s) => ({ ...s, visible: false }));
+  }, []);
+
   const goNext = useCallback(() => {
     setCurrent((prev) => (prev + 1) % finalists.length);
   }, []);
@@ -542,13 +556,87 @@ export default function Home() {
 
       {/* Hero */}
       <section
+        ref={heroRef}
+        onMouseMove={handleHeroMouseMove}
+        onMouseLeave={handleHeroMouseLeave}
         style={{
           position: "relative",
           height: "100vh",
           overflow: "hidden",
           background: "#080808",
+          cursor: "none",
         }}
       >
+        {/* Cursor spotlight */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            pointerEvents: "none",
+            zIndex: 20,
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          {/* Radial glow that follows cursor */}
+          <div
+            style={{
+              position: "absolute",
+              width: 520,
+              height: 520,
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.018) 35%, transparent 70%)",
+              transform: `translate(${spotlight.x - 260}px, ${spotlight.y - 260}px)`,
+              opacity: spotlight.visible ? 1 : 0,
+              transition: "opacity 400ms cubic-bezier(0.23,1,0.32,1), transform 80ms linear",
+              pointerEvents: "none",
+            }}
+          />
+          {/* Inner tight glow */}
+          <div
+            style={{
+              position: "absolute",
+              width: 120,
+              height: 120,
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%)",
+              transform: `translate(${spotlight.x - 60}px, ${spotlight.y - 60}px)`,
+              opacity: spotlight.visible ? 1 : 0,
+              transition: "opacity 300ms cubic-bezier(0.23,1,0.32,1), transform 50ms linear",
+              pointerEvents: "none",
+            }}
+          />
+          {/* Custom cursor dot */}
+          <div
+            style={{
+              position: "absolute",
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.7)",
+              transform: `translate(${spotlight.x - 3}px, ${spotlight.y - 3}px)`,
+              opacity: spotlight.visible ? 1 : 0,
+              transition: "opacity 200ms, transform 30ms linear",
+              pointerEvents: "none",
+            }}
+          />
+          {/* Cursor ring */}
+          <div
+            style={{
+              position: "absolute",
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              border: "0.5px solid rgba(255,255,255,0.25)",
+              transform: `translate(${spotlight.x - 16}px, ${spotlight.y - 16}px)`,
+              opacity: spotlight.visible ? 1 : 0,
+              transition: "opacity 200ms, transform 90ms cubic-bezier(0.23,1,0.32,1)",
+              pointerEvents: "none",
+            }}
+          />
+        </div>
         <div
           aria-hidden="true"
           style={{
