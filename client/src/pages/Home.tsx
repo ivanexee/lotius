@@ -4,8 +4,6 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import SeasonalParticles from "@/components/SeasonalParticles";
 import SummerWaves from "@/components/SummerWaves";
-// responsive hook available for conditional rendering
-import { useIsMobile } from "@/hooks/useMobile";
 
 /* ─── Data ─── */
 const finalists = [
@@ -186,7 +184,6 @@ function CollectionCard({
   onClick,
   isDragging,
   floatY,
-  isMobile,
 }: {
   img: string;
   season: string;
@@ -196,13 +193,12 @@ function CollectionCard({
   onClick: () => void;
   isDragging: React.MutableRefObject<boolean>;
   floatY: number;
-  isMobile: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
   const offset = index - active;
   const wrappedOffset = offset > total / 2 ? offset - total : offset < -total / 2 ? offset + total : offset;
   const isActive = index === active;
-  const translateX = wrappedOffset * (isMobile ? 85 : 50);
+  const translateX = wrappedOffset * 50;
   const translateZ = isActive ? 0 : -150 - Math.abs(wrappedOffset) * 30;
   const rotateY = wrappedOffset * -12;
   const opacity = Math.abs(wrappedOffset) > 2 ? 0 : isActive ? 1 : 0.5 - Math.abs(wrappedOffset) * 0.15;
@@ -218,7 +214,7 @@ function CollectionCard({
         position: "absolute",
         top: "50%",
         left: "50%",
-        width: "clamp(180px, 72vw, 380px)",
+        width: "clamp(240px, 36vw, 380px)",
         aspectRatio: "3/4",
         transform: `translate(-50%, calc(-50% + ${isActive ? floatY : cardFloat}px)) translateX(${translateX}%) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
         opacity: Math.max(0, opacity),
@@ -305,7 +301,6 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
   const isEven = index % 2 === 0;
   const { ref: sectionRef, inView } = useInView(0.15);
   const { floatY, floatRot } = useOrganicFloat(inView);
-  const isMobile = useIsMobile();
 
   const dragRef = useRef<{ startX: number } | null>(null);
   const isDragging = useRef(false);
@@ -347,12 +342,12 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
       className="collection-section"
       style={{
         position: "relative",
-        minHeight: "100svh",
+        minHeight: "100vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
-        padding: "clamp(3rem, 8vw, 6rem) 0",
+        padding: "6rem 0",
         background: collection.bgColor,
         transition: "background 1.2s cubic-bezier(0.23, 1, 0.32, 1)",
       }}
@@ -416,7 +411,7 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
           zIndex: 2,
           width: "100%",
           maxWidth: "900px",
-          height: "clamp(300px, 65vh, 700px)",
+          height: "clamp(400px, 70vh, 700px)",
           perspective: "1200px",
           perspectiveOrigin: "50% 50%",
           cursor: "grab",
@@ -436,7 +431,6 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
             onClick={() => setActive(i)}
             isDragging={isDragging}
             floatY={floatY}
-            isMobile={isMobile}
           />
         ))}
       </div>
@@ -541,7 +535,6 @@ export default function Home() {
 
   const { floatY: heroFloatY } = useOrganicFloat(true);
   const finalist = finalists[current];
-  const isMobile = useIsMobile();
 
   return (
     <div className="page-enter" style={{ minHeight: "100vh" }}>
@@ -551,7 +544,7 @@ export default function Home() {
       <section
         style={{
           position: "relative",
-          height: "100svh",
+          height: "100vh",
           overflow: "hidden",
           background: "#faf8f5",
         }}
@@ -612,9 +605,9 @@ export default function Home() {
                 onClick={() => { if (!isActive) setCurrent(i); }}
                 style={{
                   position: "absolute",
-                  width: "clamp(160px, 60vw, 360px)",
+                  width: "clamp(220px, 32vw, 360px)",
                   aspectRatio: "3/4",
-                  transform: `translateX(${wrapped * (isMobile ? 90 : 48)}%) translateZ(${isActive ? 0 : -120 - Math.abs(wrapped) * 40}px) rotateY(${wrapped * -10}deg) scale(${isActive ? 1 : 0.8 - Math.abs(wrapped) * 0.06})`,
+                  transform: `translateX(${wrapped * 48}%) translateZ(${isActive ? 0 : -120 - Math.abs(wrapped) * 40}px) rotateY(${wrapped * -10}deg) scale(${isActive ? 1 : 0.8 - Math.abs(wrapped) * 0.06})`,
                   opacity: Math.abs(wrapped) > 2 ? 0 : isActive ? 1 : 0.45 - Math.abs(wrapped) * 0.1,
                   transition: "all 900ms cubic-bezier(0.23, 1, 0.32, 1)",
                   zIndex: isActive ? 10 : 5 - Math.abs(wrapped),
@@ -698,9 +691,9 @@ export default function Home() {
       </section>
 
       {/* Intro */}
-      <section style={{ padding: "clamp(4rem, 10vw, 10rem) 0", background: "#fff" }}>
+      <section style={{ padding: "10rem 0", background: "#fff" }}>
         <RevealSection>
-          <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 clamp(1rem, 5vw, 2rem)", textAlign: "center" }}>
+          <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 2rem", textAlign: "center" }}>
             <p style={{ fontFamily: "'Bodoni Moda', serif", fontWeight: 400, fontSize: "clamp(18px, 3vw, 28px)", letterSpacing: "0.04em", lineHeight: 1.6, color: "rgba(0,0,0,0.8)" }}>
               THE LOTIUS AWARD WAS CREATED TO CELEBRATE AND SUPPORT CREATIVE
               TALENT FROM AROUND THE WORLD. EACH SEASON, WE PRESENT COLLECTIONS
@@ -716,21 +709,19 @@ export default function Home() {
       ))}
 
       {/* About Me */}
-      <section style={{ padding: "clamp(4rem, 8vw, 8rem) 0", background: "#fff", borderTop: "0.5px solid rgba(0,0,0,0.08)" }}>
+      <section style={{ padding: "8rem 0", background: "#fff", borderTop: "0.5px solid rgba(0,0,0,0.08)" }}>
         <RevealSection>
-          <div style={{ maxWidth: 640, margin: "0 auto", padding: "0 clamp(1rem, 5vw, 2rem)" }}>
-            <span className="label-caps" style={{ opacity: 0.4, display: "block", marginBottom: "1.5rem" }}>
+          <div style={{ maxWidth: 700, margin: "0 auto", padding: "0 2rem", textAlign: "center" }}>
+            <span className="label-caps" style={{ opacity: 0.4, display: "block", marginBottom: "2rem" }}>
               ABOUT THE DESIGNER
             </span>
             <h2
               style={{
                 fontFamily: "'Bodoni Moda', serif",
                 fontWeight: 400,
-                fontSize: "clamp(28px, 4vw, 44px)",
-                letterSpacing: "0.02em",
-                textTransform: "uppercase",
-                marginBottom: "1.5rem",
-                lineHeight: 1.15,
+                fontSize: "clamp(32px, 5vw, 52px)",
+                letterSpacing: "-0.01em",
+                marginBottom: "2rem",
               }}
             >
               The Vision Behind Lotius
@@ -739,10 +730,10 @@ export default function Home() {
               style={{
                 fontFamily: "'Cormorant Garamond', serif",
                 fontWeight: 300,
-                fontSize: "clamp(16px, 1.8vw, 19px)",
-                lineHeight: 1.85,
-                color: "oklch(0.25 0 0)",
-                marginBottom: "2rem",
+                fontSize: "clamp(16px, 2vw, 20px)",
+                lineHeight: 1.8,
+                color: "rgba(0,0,0,0.65)",
+                marginBottom: "3rem",
               }}
             >
               Lotius is a creative expression born from the intersection of art, fashion,
@@ -750,36 +741,55 @@ export default function Home() {
               to the glacial stillness of winter. We believe in the power of design to transform,
               inspire, and connect people across the world.
             </p>
+
             <a
               href="https://www.instagram.com/i.cxccc?igsh=MTUxYm45amdsdmo3bw%3D%3D&utm_source=qr"
               target="_blank"
               rel="noopener noreferrer"
-              className="label-caps"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                gap: "0.5rem",
-                color: "oklch(0.08 0 0)",
+                gap: "0.75rem",
+                fontFamily: "'Bodoni Moda', serif",
+                fontSize: 11,
+                letterSpacing: "0.3em",
+                textTransform: "uppercase",
+                color: "rgba(0,0,0,0.7)",
                 textDecoration: "none",
-                opacity: 0.7,
-                transition: "opacity 200ms",
+                padding: "1rem 2rem",
+                border: "0.5px solid rgba(0,0,0,0.2)",
+                transition: "all 300ms cubic-bezier(0.23, 1, 0.32, 1)",
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.7"; }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(0,0,0,0.9)";
+                e.currentTarget.style.color = "#fff";
+                e.currentTarget.style.borderColor = "rgba(0,0,0,0.9)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = "rgba(0,0,0,0.7)";
+                e.currentTarget.style.borderColor = "rgba(0,0,0,0.2)";
+              }}
             >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
                 <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
                 <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
               </svg>
               @i.cxccc
             </a>
+
+            <div style={{ marginTop: "2rem" }}>
+              <p style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: 14, color: "rgba(0,0,0,0.4)", letterSpacing: "0.05em" }}>
+                Follow for behind-the-scenes, new collections, and creative inspiration.
+              </p>
+            </div>
           </div>
         </RevealSection>
       </section>
 
       {/* CTA */}
-      <section style={{ padding: "clamp(4rem, 8vw, 8rem) 0", background: "#faf8f5" }}>
+      <section style={{ padding: "8rem 0", background: "#faf8f5" }}>
         <RevealSection>
           <div style={{ textAlign: "center" }}>
             <h2 style={{ fontFamily: "'Bodoni Moda', serif", fontWeight: 400, fontSize: "clamp(32px, 6vw, 64px)", letterSpacing: "-0.02em", marginBottom: "2rem" }}>

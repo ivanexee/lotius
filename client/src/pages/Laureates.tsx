@@ -234,12 +234,12 @@ export default function Laureates() {
               maxWidth: 1440,
               margin: "0 auto 4rem",
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
-              gap: "clamp(1.5rem, 3vw, 3rem)",
+              gridTemplateColumns: "auto 1fr",
+              gap: "3rem",
               alignItems: "start",
             }}
           >
-            <div style={{ width: "100%", maxWidth: "clamp(160px, 20vw, 260px)" }}>
+            <div style={{ width: "clamp(160px, 20vw, 260px)" }}>
               <img
                 src={selected.image}
                 alt={selected.name}

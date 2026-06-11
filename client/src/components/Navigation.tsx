@@ -59,7 +59,7 @@ export default function Navigation() {
 
       <header
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
-        style={{ padding: "clamp(0.75rem, 2vw, 1.25rem) clamp(1rem, 3vw, 1.5rem)" }}
+        style={{ padding: "1.25rem 1.5rem" }}
       >
         {/* Hamburger / X toggle */}
         <button
@@ -177,7 +177,7 @@ export default function Navigation() {
         {/* Top bar inside overlay */}
         <div
           className="flex items-center justify-between"
-          style={{ padding: "clamp(0.75rem, 2vw, 1.25rem) clamp(1rem, 3vw, 1.5rem)", flexShrink: 0 }}
+          style={{ padding: "1.25rem 1.5rem", flexShrink: 0 }}
         >
           {/* Invisible spacer matching hamburger width */}
           <div style={{ width: 32 }} />
@@ -210,7 +210,7 @@ export default function Navigation() {
             flex: 1,
             display: "flex",
             flexDirection: "column",
-            padding: "clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 2rem) clamp(1rem, 2vw, 2rem)",
+            padding: "3rem 2rem 2rem",
             gap: "3rem",
             overflowY: "auto",
           }}
@@ -374,16 +374,15 @@ export default function Navigation() {
         {/* Footer strip */}
         <div
           style={{
-          padding: "clamp(0.75rem, 2vw, 1.25rem) clamp(1rem, 3vw, 2rem)",
-          borderTop: "0.5px solid rgba(0,0,0,0.08)",
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "clamp(0.75rem, 2vw, 2rem)",
-          fontSize: 9,
-          letterSpacing: "0.3em",
-          textTransform: "uppercase",
-          opacity: 0.35,
-          flexShrink: 0,
+            padding: "1.25rem 2rem",
+            borderTop: "0.5px solid rgba(0,0,0,0.08)",
+            display: "flex",
+            gap: "2rem",
+            fontSize: 9,
+            letterSpacing: "0.3em",
+            textTransform: "uppercase",
+            opacity: 0.35,
+            flexShrink: 0,
           }}
         >
           <a href="#" style={{ textDecoration: "none", color: "inherit" }}>Legal Terms</a>

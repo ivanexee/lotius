@@ -224,7 +224,7 @@ export default function Mentors() {
             maxWidth: 1440,
             margin: "0 auto",
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
             gap: "0 4rem",
           }}
         >
