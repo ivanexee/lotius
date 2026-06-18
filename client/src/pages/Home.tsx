@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import SeasonalParticles from "@/components/SeasonalParticles";
-import SummerWaves from "@/components/SummerWaves";
+import OceanWaves from "@/components/OceanWaves";
 
 /* ─── Data ─── */
 const finalists = [
@@ -352,7 +352,7 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
         transition: "background 1.2s cubic-bezier(0.23, 1, 0.32, 1)",
       }}
     >
-      {isSummer && <SummerWaves active={inView} />}
+      {isSummer && <OceanWaves active={inView} />}
       <SeasonalParticles season={collection.seasonKey} active={inView} />
 
       {/* Background text — behind images */}
