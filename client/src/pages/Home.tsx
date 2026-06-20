@@ -297,6 +297,7 @@ function CollectionCard({
 /* ─── Floating 3D Collection Carousel ─── */
 function CollectionCarousel({ collection, index }: { collection: typeof collections[0]; index: number }) {
   const [active, setActive] = useState(0);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const total = collection.images.length;
   const isEven = index % 2 === 0;
   const { ref: sectionRef, inView } = useInView(0.15);
@@ -312,6 +313,25 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
     }, 4500);
     return () => clearInterval(interval);
   }, [total, inView]);
+
+  // Track scroll progress for Summer section sunray intensity
+  useEffect(() => {
+    if (!sectionRef.current) return;
+    const handleScroll = () => {
+      const rect = sectionRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      // Calculate progress: 0 at top, 1 at center, 0 at bottom
+      const viewportCenter = window.innerHeight / 2;
+      const sectionCenter = rect.top + rect.height / 2;
+      const distance = Math.abs(sectionCenter - viewportCenter);
+      const maxDistance = window.innerHeight / 2 + rect.height / 2;
+      const progress = Math.max(0, 1 - distance / maxDistance);
+      setScrollProgress(progress);
+    };
+    window.addEventListener("scroll", handleScroll);
+    handleScroll(); // Call once on mount
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     dragRef.current = { startX: e.clientX };
@@ -352,7 +372,7 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
         transition: "background 1.2s cubic-bezier(0.23, 1, 0.32, 1)",
       }}
     >
-      {isSummer && <OceanWaves active={inView} />}
+      {isSummer && <OceanWaves active={inView} scrollProgress={scrollProgress} />}
       <SeasonalParticles season={collection.seasonKey} active={inView} />
 
       {/* Background text — behind images */}
