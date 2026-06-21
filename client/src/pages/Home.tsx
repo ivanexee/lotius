@@ -388,6 +388,8 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
           pointerEvents: "none",
           zIndex: 1,
           padding: "0 3vw",
+          transform: isSummer ? `translateY(${scrollProgress * 40 - 20}px)` : "none",
+          transition: "transform 0.15s linear",
         }}
       >
         <span
@@ -468,6 +470,8 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
           pointerEvents: "none",
           zIndex: 6,
           padding: "0 4vw",
+          transform: isSummer ? `translateY(${scrollProgress * 30 - 15}px)` : "none",
+          transition: "transform 0.15s linear",
         }}
       >
         <span
