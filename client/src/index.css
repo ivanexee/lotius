@@ -297,6 +297,30 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Staggered collection card reveals */
+.collection-card-reveal {
+  opacity: 0;
+  transform: translateY(30px) scale(0.95);
+  transition: opacity 700ms var(--ease-luxury), transform 700ms var(--ease-luxury);
+}
+
+.collection-card-reveal.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Staggered text reveals */
+.collection-text-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 650ms var(--ease-luxury), transform 650ms var(--ease-luxury);
+}
+
+.collection-text-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* Collection sections */
 .collection-section {
   border-top: 0.5px solid rgba(0,0,0,0.06);

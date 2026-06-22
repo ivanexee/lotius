@@ -184,6 +184,7 @@ function CollectionCard({
   onClick,
   isDragging,
   floatY,
+  sectionInView,
 }: {
   img: string;
   season: string;
@@ -193,8 +194,21 @@ function CollectionCard({
   onClick: () => void;
   isDragging: React.MutableRefObject<boolean>;
   floatY: number;
+  sectionInView: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    if (!sectionInView) {
+      setIsVisible(false);
+      return;
+    }
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, index * 80);
+    return () => clearTimeout(timer);
+  }, [sectionInView, index]);
   const offset = index - active;
   const wrappedOffset = offset > total / 2 ? offset - total : offset < -total / 2 ? offset + total : offset;
   const isActive = index === active;
@@ -207,6 +221,7 @@ function CollectionCard({
 
   return (
     <div
+      className={`collection-card-reveal ${isVisible ? 'visible' : ''}`}
       onClick={() => { if (!isDragging.current) onClick(); }}
       onMouseEnter={() => isActive && setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -393,6 +408,7 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
         }}
       >
         <span
+          className={`collection-text-reveal ${inView ? 'visible' : ''}`}
           style={{
             fontFamily: "'Bodoni Moda', serif",
             fontWeight: 400,
@@ -402,11 +418,13 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
             color: collection.textColor,
             whiteSpace: "nowrap",
             userSelect: "none",
+            transitionDelay: "0ms",
           }}
         >
           {collection.season}
         </span>
         <span
+          className={`collection-text-reveal ${inView ? 'visible' : ''}`}
           style={{
             fontFamily: "'Bodoni Moda', serif",
             fontWeight: 400,
@@ -417,6 +435,7 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
             whiteSpace: "nowrap",
             userSelect: "none",
             marginTop: "-1rem",
+            transitionDelay: "100ms",
           }}
         >
           {collection.year}
@@ -453,6 +472,7 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
             onClick={() => setActive(i)}
             isDragging={isDragging}
             floatY={floatY}
+            sectionInView={inView}
           />
         ))}
       </div>
@@ -475,6 +495,7 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
         }}
       >
         <span
+          className={`collection-text-reveal ${inView ? 'visible' : ''}`}
           style={{
             fontFamily: "'Bodoni Moda', serif",
             fontWeight: 400,
@@ -485,11 +506,13 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
             whiteSpace: "nowrap",
             userSelect: "none",
             mixBlendMode: "multiply",
+            transitionDelay: "200ms",
           }}
         >
           {collection.season}
         </span>
         <span
+          className={`collection-text-reveal ${inView ? 'visible' : ''}`}
           style={{
             fontFamily: "'Cormorant Garamond', serif",
             fontWeight: 300,
@@ -498,6 +521,7 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
             textTransform: "uppercase",
             color: collection.subtitleColor,
             marginTop: "0.5rem",
+            transitionDelay: "300ms",
           }}
         >
           {collection.subtitle}
