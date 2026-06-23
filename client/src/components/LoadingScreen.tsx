@@ -1,38 +1,54 @@
 /**
  * LoadingScreen — Lotius
  * Design: Bodoni Moda wave animation, left-to-right letter illumination
- * Matches the provided lotius_loading_final.html exactly
+ * Adapts text color to dark/light mode so letters are always visible.
  */
 import { useEffect, useRef } from "react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface LoadingScreenProps {
   fadeOut: boolean;
 }
 
 export default function LoadingScreen({ fadeOut }: LoadingScreenProps) {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
   const lettersRef = useRef<HTMLSpanElement[]>([]);
   const pctRef = useRef<HTMLSpanElement>(null);
   const startRef = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const DURATION = 5500;
 
+  // Base and full opacity values per theme
+  const baseAlpha = 0.07;
+  const fullAlpha = 0.93;
+
   const ease = (t: number) =>
     t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
   useEffect(() => {
+    // Re-run animation when theme changes so colors update immediately
+    startRef.current = null;
+
     const tick = (now: number) => {
       if (startRef.current === null) startRef.current = now;
       const t = Math.min((now - startRef.current) / DURATION, 1);
       const v = ease(t);
+      const dark = document.documentElement.classList.contains("dark");
+      const channel = dark ? "255,255,255" : "0,0,0";
 
       lettersRef.current.forEach((l, i) => {
         if (!l) return;
         const lp = Math.min(1, Math.max(0, v * lettersRef.current.length - i));
-        l.style.color = `rgba(0,0,0,${(0.07 + lp * 0.93).toFixed(3)})`;
+        l.style.color = `rgba(${channel},${(baseAlpha + lp * fullAlpha).toFixed(3)})`;
       });
 
       if (pctRef.current) {
         pctRef.current.textContent = Math.round(v * 100) + "%";
+        pctRef.current.style.color = dark
+          ? `rgba(255,255,255,0.35)`
+          : `rgba(0,0,0,0.22)`;
       }
 
       if (t < 1) {
@@ -40,11 +56,12 @@ export default function LoadingScreen({ fadeOut }: LoadingScreenProps) {
       }
     };
 
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
     rafRef.current = requestAnimationFrame(tick);
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, []);
+  }, [isDark]);
 
   const letters = ["l", "o", "t", "i", "u", "s"];
   const delays = [0, 0.14, 0.28, 0.42, 0.56, 0.70];
@@ -53,6 +70,10 @@ export default function LoadingScreen({ fadeOut }: LoadingScreenProps) {
     <div
       className={`loading-screen${fadeOut ? " fade-out" : ""}`}
       aria-label="Lotius loading screen"
+      style={{
+        background: isDark ? "oklch(0.08 0 0)" : "#fff",
+        transition: "background 450ms cubic-bezier(0.23,1,0.32,1)",
+      }}
     >
       <div style={{ display: "flex", alignItems: "baseline" }}>
         {letters.map((letter, i) => (
@@ -68,10 +89,12 @@ export default function LoadingScreen({ fadeOut }: LoadingScreenProps) {
               fontSize: "clamp(56px, 12vw, 96px)",
               letterSpacing: "0.08em",
               padding: "0 2px",
-              color: "rgba(0,0,0,0.07)",
+              // Start dim in the correct theme color
+              color: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)",
               willChange: "transform",
               animation: `wv 1.9s ease-in-out infinite`,
               animationDelay: `${delays[i]}s`,
+              transition: "color 300ms cubic-bezier(0.23,1,0.32,1)",
             }}
           >
             {letter}
@@ -86,7 +109,8 @@ export default function LoadingScreen({ fadeOut }: LoadingScreenProps) {
           fontSize: "11px",
           letterSpacing: "0.42em",
           textTransform: "uppercase",
-          color: "rgba(0,0,0,0.22)",
+          color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.22)",
+          transition: "color 300ms cubic-bezier(0.23,1,0.32,1)",
         }}
       >
         0%

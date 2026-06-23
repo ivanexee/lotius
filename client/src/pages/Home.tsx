@@ -583,18 +583,76 @@ export default function Home() {
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  // Cursor spotlight state
-  const [spotlight, setSpotlight] = useState({ x: -9999, y: -9999, visible: false });
+  // Cursor spotlight state — smooth lagging ring via rAF interpolation
   const heroRef = useRef<HTMLElement>(null);
+  const rawPos = useRef({ x: -9999, y: -9999 });
+  const dotPos = useRef({ x: -9999, y: -9999 });
+  const ringPos = useRef({ x: -9999, y: -9999 });
+  const glowPos = useRef({ x: -9999, y: -9999 });
+  const cursorVisible = useRef(false);
+  const dotEl = useRef<HTMLDivElement>(null);
+  const ringEl = useRef<HTMLDivElement>(null);
+  const innerGlowEl = useRef<HTMLDivElement>(null);
+  const outerGlowEl = useRef<HTMLDivElement>(null);
+  const rafCursor = useRef<number>(0);
 
   const handleHeroMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const rect = heroRef.current?.getBoundingClientRect();
     if (!rect) return;
-    setSpotlight({ x: e.clientX - rect.left, y: e.clientY - rect.top, visible: true });
+    rawPos.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    cursorVisible.current = true;
   }, []);
 
   const handleHeroMouseLeave = useCallback(() => {
-    setSpotlight((s) => ({ ...s, visible: false }));
+    cursorVisible.current = false;
+    if (dotEl.current) dotEl.current.style.opacity = "0";
+    if (ringEl.current) ringEl.current.style.opacity = "0";
+    if (innerGlowEl.current) innerGlowEl.current.style.opacity = "0";
+    if (outerGlowEl.current) outerGlowEl.current.style.opacity = "0";
+  }, []);
+
+  // rAF loop: dot snaps instantly, ring lags behind for a trailing feel
+  useEffect(() => {
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+    const tick = () => {
+      const raw = rawPos.current;
+      const vis = cursorVisible.current;
+
+      // Dot: snappy (lerp factor 0.85)
+      dotPos.current.x = lerp(dotPos.current.x, raw.x, 0.85);
+      dotPos.current.y = lerp(dotPos.current.y, raw.y, 0.85);
+
+      // Ring: medium lag (lerp factor 0.18)
+      ringPos.current.x = lerp(ringPos.current.x, raw.x, 0.18);
+      ringPos.current.y = lerp(ringPos.current.y, raw.y, 0.18);
+
+      // Outer glow: slowest (lerp factor 0.10)
+      glowPos.current.x = lerp(glowPos.current.x, raw.x, 0.10);
+      glowPos.current.y = lerp(glowPos.current.y, raw.y, 0.10);
+
+      const opacity = vis ? "1" : "0";
+
+      if (dotEl.current) {
+        dotEl.current.style.transform = `translate(${dotPos.current.x - 4}px, ${dotPos.current.y - 4}px)`;
+        dotEl.current.style.opacity = opacity;
+      }
+      if (ringEl.current) {
+        ringEl.current.style.transform = `translate(${ringPos.current.x - 22}px, ${ringPos.current.y - 22}px)`;
+        ringEl.current.style.opacity = vis ? "0.7" : "0";
+      }
+      if (innerGlowEl.current) {
+        innerGlowEl.current.style.transform = `translate(${dotPos.current.x - 70}px, ${dotPos.current.y - 70}px)`;
+        innerGlowEl.current.style.opacity = vis ? "1" : "0";
+      }
+      if (outerGlowEl.current) {
+        outerGlowEl.current.style.transform = `translate(${glowPos.current.x - 280}px, ${glowPos.current.y - 280}px)`;
+        outerGlowEl.current.style.opacity = vis ? "1" : "0";
+      }
+
+      rafCursor.current = requestAnimationFrame(tick);
+    };
+    rafCursor.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafCursor.current);
   }, []);
 
   const goNext = useCallback(() => {
@@ -632,7 +690,7 @@ export default function Home() {
           cursor: "none",
         }}
       >
-        {/* Cursor spotlight */}
+        {/* Cursor spotlight — rAF-driven, no React re-renders */}
         <div
           aria-hidden="true"
           style={{
@@ -643,62 +701,68 @@ export default function Home() {
             left: 0,
             width: "100%",
             height: "100%",
+            overflow: "hidden",
           }}
         >
-          {/* Radial glow that follows cursor */}
+          {/* Outer ambient glow — slowest, drifts behind */}
           <div
+            ref={outerGlowEl}
             style={{
               position: "absolute",
-              width: 520,
-              height: 520,
+              width: 560,
+              height: 560,
               borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.018) 35%, transparent 70%)",
-              transform: `translate(${spotlight.x - 260}px, ${spotlight.y - 260}px)`,
-              opacity: spotlight.visible ? 1 : 0,
-              transition: "opacity 400ms cubic-bezier(0.23,1,0.32,1), transform 80ms linear",
+              background: "radial-gradient(circle, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.012) 40%, transparent 70%)",
+              opacity: 0,
               pointerEvents: "none",
+              willChange: "transform, opacity",
+              transition: "opacity 500ms cubic-bezier(0.23,1,0.32,1)",
             }}
           />
-          {/* Inner tight glow */}
+          {/* Inner tight glow — snaps with dot */}
           <div
+            ref={innerGlowEl}
             style={{
               position: "absolute",
-              width: 120,
-              height: 120,
+              width: 140,
+              height: 140,
               borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%)",
-              transform: `translate(${spotlight.x - 60}px, ${spotlight.y - 60}px)`,
-              opacity: spotlight.visible ? 1 : 0,
-              transition: "opacity 300ms cubic-bezier(0.23,1,0.32,1), transform 50ms linear",
+              background: "radial-gradient(circle, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.04) 50%, transparent 75%)",
+              opacity: 0,
               pointerEvents: "none",
+              willChange: "transform, opacity",
+              transition: "opacity 300ms cubic-bezier(0.23,1,0.32,1)",
             }}
           />
-          {/* Custom cursor dot */}
+          {/* Outer ring — lags behind cursor for trailing effect */}
           <div
+            ref={ringEl}
             style={{
               position: "absolute",
-              width: 6,
-              height: 6,
+              width: 44,
+              height: 44,
               borderRadius: "50%",
-              background: "rgba(255,255,255,0.7)",
-              transform: `translate(${spotlight.x - 3}px, ${spotlight.y - 3}px)`,
-              opacity: spotlight.visible ? 1 : 0,
-              transition: "opacity 200ms, transform 30ms linear",
+              border: "0.75px solid rgba(255,255,255,0.35)",
+              opacity: 0,
               pointerEvents: "none",
+              willChange: "transform, opacity",
+              transition: "opacity 250ms cubic-bezier(0.23,1,0.32,1), width 200ms cubic-bezier(0.23,1,0.32,1), height 200ms cubic-bezier(0.23,1,0.32,1)",
             }}
           />
-          {/* Cursor ring */}
+          {/* Sharp center dot — snappiest */}
           <div
+            ref={dotEl}
             style={{
               position: "absolute",
-              width: 32,
-              height: 32,
+              width: 8,
+              height: 8,
               borderRadius: "50%",
-              border: "0.5px solid rgba(255,255,255,0.25)",
-              transform: `translate(${spotlight.x - 16}px, ${spotlight.y - 16}px)`,
-              opacity: spotlight.visible ? 1 : 0,
-              transition: "opacity 200ms, transform 90ms cubic-bezier(0.23,1,0.32,1)",
+              background: "rgba(255,255,255,0.9)",
+              boxShadow: "0 0 8px rgba(255,255,255,0.5)",
+              opacity: 0,
               pointerEvents: "none",
+              willChange: "transform, opacity",
+              transition: "opacity 200ms cubic-bezier(0.23,1,0.32,1)",
             }}
           />
         </div>
@@ -861,7 +925,7 @@ export default function Home() {
       ))}
 
       {/* About Me */}
-      <section data-section="about" style={{ padding: "8rem 0", background: isDark ? "oklch(0.1 0 0)" : "#fff", borderTop: `0.5px solid ${isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)"}`, transition: "background 450ms cubic-bezier(0.23,1,0.32,1), border-color 450ms cubic-bezier(0.23,1,0.32,1)" }}>
+      <section data-section="about" style={{ padding: "8rem 0", background: isDark ? "oklch(0.13 0.012 60)" : "#f5ede0", borderTop: `0.5px solid ${isDark ? "rgba(255,220,170,0.1)" : "rgba(160,120,70,0.12)"}`, transition: "background 450ms cubic-bezier(0.23,1,0.32,1), border-color 450ms cubic-bezier(0.23,1,0.32,1)" }}>
         <RevealSection>
           <div style={{ maxWidth: 700, margin: "0 auto", padding: "0 2rem", textAlign: "center" }}>
             <span className="label-caps" style={{ opacity: 0.4, display: "block", marginBottom: "2rem" }}>
@@ -939,7 +1003,7 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section data-section="cta" style={{ padding: "8rem 0", background: isDark ? "oklch(0.12 0 0)" : "#faf8f5", transition: "background 450ms cubic-bezier(0.23,1,0.32,1)" }}>
+      <section data-section="cta" style={{ padding: "8rem 0", background: isDark ? "oklch(0.11 0.01 55)" : "#ede3d4", transition: "background 450ms cubic-bezier(0.23,1,0.32,1)" }}>
         <RevealSection>
           <div style={{ textAlign: "center" }}>
             <h2 style={{ fontFamily: "'Bodoni Moda', serif", fontWeight: 400, fontSize: "clamp(32px, 6vw, 64px)", letterSpacing: "-0.02em", marginBottom: "2rem" }}>
