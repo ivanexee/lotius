@@ -13,7 +13,7 @@ import Council from "./pages/Council";
 import Mentors from "./pages/Mentors";
 import LoadingScreen from "./components/LoadingScreen";
 import { useState, useEffect } from "react";
-import { initializeGoogleTranslate, translatePage } from "./lib/translate";
+import { initializeGoogleTranslate } from "./lib/translate";
 
 // Hidden div for Google Translate element
 if (typeof document !== "undefined" && !document.getElementById("google_translate_element")) {
@@ -38,20 +38,24 @@ function Router() {
 }
 
 function App() {
-  const hasSeenLoading = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('lotius_loaded');
-  const [loading, setLoading] = useState(!hasSeenLoading);
+  // Always show loading screen on every page load/refresh — no sessionStorage skip
+  const [loading, setLoading] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
 
   useEffect(() => {
-    if (hasSeenLoading) return;
-    const timer = setTimeout(() => {
+    // Show loading screen for 5.8s, then fade out over 700ms
+    const fadeTimer = setTimeout(() => {
       setFadeOut(true);
-      setTimeout(() => {
-        setLoading(false);
-        sessionStorage.setItem('lotius_loaded', '1');
-      }, 700);
     }, 5800);
-    return () => clearTimeout(timer);
+
+    const hideTimer = setTimeout(() => {
+      setLoading(false);
+    }, 6500); // 5800 + 700ms fade
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(hideTimer);
+    };
   }, []);
 
   // Initialize Google Translate

@@ -20,15 +20,20 @@ interface ThemeProviderProps {
 // then remove it so it doesn't interfere with scroll/motion animations afterwards.
 function withThemeTransition(callback: () => void) {
   const root = document.documentElement;
-  // Add transition class
   root.classList.add("theme-transitioning");
-  // Execute the actual theme change
   callback();
-  // Remove after transition completes (450ms + small buffer)
   const timer = window.setTimeout(() => {
     root.classList.remove("theme-transitioning");
   }, 500);
   return timer;
+}
+
+// Detect the current system preference
+function getSystemTheme(): Theme {
+  if (typeof window !== "undefined" && window.matchMedia) {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  return "light";
 }
 
 export function ThemeProvider({
@@ -37,17 +42,15 @@ export function ThemeProvider({
   switchable = true,
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
-    // Check for stored preference first
-    const stored = localStorage.getItem("theme");
-    if (stored) return (stored as Theme);
-    
-    // Detect system preference automatically
-    if (typeof window !== "undefined" && window.matchMedia) {
-      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-        return "dark";
-      }
+    // On every page load, ALWAYS start from system preference.
+    // A manual override stored in sessionStorage (NOT localStorage) is respected
+    // only for the current browser session — it clears on tab close / refresh.
+    const sessionOverride = sessionStorage.getItem("theme-manual-session");
+    if (sessionOverride === "dark" || sessionOverride === "light") {
+      return sessionOverride as Theme;
     }
-    return defaultTheme;
+    // No session override → use live system preference
+    return getSystemTheme();
   });
 
   // Apply .dark class to <html> whenever theme changes
@@ -60,33 +63,27 @@ export function ThemeProvider({
         root.classList.remove("dark");
       }
     });
+  }, [theme]);
 
-    if (switchable) {
-      localStorage.setItem("theme", theme);
-    }
-  }, [theme, switchable]);
-
-  // Listen for OS-level system theme changes (e.g. iPhone switches to dark mode)
+  // Listen for OS-level system theme changes at runtime
+  // (e.g. user flips dark mode on their iPhone while the page is open)
   useEffect(() => {
     if (typeof window === "undefined" || !window.matchMedia) return;
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    
+
     const handleChange = (e: MediaQueryListEvent) => {
-      // Only auto-switch if user hasn't manually overridden theme
-      const hasManualPreference = localStorage.getItem("theme-manual");
-      if (!hasManualPreference) {
+      // Only auto-switch if the user hasn't manually toggled this session
+      const hasSessionOverride = sessionStorage.getItem("theme-manual-session");
+      if (!hasSessionOverride) {
         setTheme(e.matches ? "dark" : "light");
       }
     };
 
-    // Modern browsers
     if (mediaQuery.addEventListener) {
       mediaQuery.addEventListener("change", handleChange);
       return () => mediaQuery.removeEventListener("change", handleChange);
-    }
-    // Fallback for older browsers
-    else if ((mediaQuery as any).addListener) {
+    } else if ((mediaQuery as any).addListener) {
       (mediaQuery as any).addListener(handleChange);
       return () => (mediaQuery as any).removeListener(handleChange);
     }
@@ -96,8 +93,9 @@ export function ThemeProvider({
     ? () => {
         setTheme(prev => {
           const newTheme = prev === "light" ? "dark" : "light";
-          // Mark that user manually changed theme so system changes don't override
-          localStorage.setItem("theme-manual", "true");
+          // Store in sessionStorage only — clears on refresh so system preference
+          // takes over again on the next page load.
+          sessionStorage.setItem("theme-manual-session", newTheme);
           return newTheme;
         });
       }

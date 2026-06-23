@@ -842,43 +842,7 @@ export default function Home() {
           })}
         </div>
 
-        <div
-          style={{
-            position: "absolute",
-          bottom: "8rem",
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 4,
-          textAlign: "center",
-          mixBlendMode: "normal" as const,
-          }}
-        >
-          <p
-            key={finalist.name}
-            style={{
-              fontFamily: "'Bodoni Moda', serif",
-              fontWeight: 400,
-              fontSize: "clamp(14px, 2vw, 20px)",
-              letterSpacing: "0.25em",
-              textTransform: "uppercase",
-              animation: "fadeUp 500ms cubic-bezier(0.23,1,0.32,1) both",
-            }}
-          >
-            {finalist.name}
-          </p>
-          <p
-            style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontWeight: 300,
-              fontSize: "clamp(11px, 1.4vw, 14px)",
-              letterSpacing: "0.15em",
-              opacity: 0.5,
-              marginTop: "0.25rem",
-            }}
-          >
-            {finalist.brand}
-          </p>
-        </div>
+
 
         <div
           style={{
