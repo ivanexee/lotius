@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Instagram } from "lucide-react";
+import { Instagram, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 
 const mainLinks = [
@@ -19,7 +19,7 @@ const seasonLinks = [
 ];
 
 export default function Navigation() {
-  const { theme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
   const [open, setOpen] = useState(false);
   const [location] = useLocation();
@@ -142,7 +142,7 @@ export default function Navigation() {
           </span>
         </Link>
 
-        {/* Right: Instagram + language */}
+        {/* Right: Instagram + theme toggle + language */}
         <div className="flex items-center gap-4" style={{ zIndex: 51 }}>
           <a
             href="https://www.instagram.com/i.cxccc?igsh=MTUxYm45amdsdmo3bw%3D%3D&utm_source=qr"
@@ -152,6 +152,66 @@ export default function Navigation() {
           >
             <Instagram size={16} strokeWidth={1} />
           </a>
+
+          {/* Dark / Light mode toggle */}
+          {toggleTheme && (
+            <button
+              onClick={toggleTheme}
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              style={{
+                background: "none",
+                border: "none",
+                padding: "2px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "currentColor",
+                opacity: 0.75,
+                transition: "opacity 200ms cubic-bezier(0.23,1,0.32,1), transform 200ms cubic-bezier(0.23,1,0.32,1)",
+                lineHeight: 0,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = "1";
+                e.currentTarget.style.transform = "scale(1.15) rotate(15deg)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = "0.75";
+                e.currentTarget.style.transform = "scale(1) rotate(0deg)";
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = "scale(0.9) rotate(0deg)";
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = "scale(1.15) rotate(15deg)";
+              }}
+            >
+              <span
+                style={{
+                  display: "block",
+                  transition: "opacity 300ms cubic-bezier(0.23,1,0.32,1), transform 350ms cubic-bezier(0.23,1,0.32,1)",
+                  opacity: isDark ? 1 : 0,
+                  transform: isDark ? "rotate(0deg) scale(1)" : "rotate(-90deg) scale(0.5)",
+                  position: "absolute",
+                  lineHeight: 0,
+                }}
+              >
+                <Sun size={15} strokeWidth={1} />
+              </span>
+              <span
+                style={{
+                  display: "block",
+                  transition: "opacity 300ms cubic-bezier(0.23,1,0.32,1), transform 350ms cubic-bezier(0.23,1,0.32,1)",
+                  opacity: isDark ? 0 : 1,
+                  transform: isDark ? "rotate(90deg) scale(0.5)" : "rotate(0deg) scale(1)",
+                  lineHeight: 0,
+                }}
+              >
+                <Moon size={15} strokeWidth={1} />
+              </span>
+            </button>
+          )}
+
           <div className="flex items-center gap-1" style={{ fontSize: 10, letterSpacing: "0.2em" }}>
             <span style={{ opacity: 0.4 }}>FR</span>
             <span style={{ opacity: 0.3 }}>/</span>
