@@ -4,6 +4,8 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
+import { TranslationPrompt } from "./components/TranslationPrompt";
 import Home from "./pages/Home";
 import Discover from "./pages/Discover";
 import Laureates from "./pages/Laureates";
@@ -11,6 +13,15 @@ import Council from "./pages/Council";
 import Mentors from "./pages/Mentors";
 import LoadingScreen from "./components/LoadingScreen";
 import { useState, useEffect } from "react";
+import { initializeGoogleTranslate, translatePage } from "./lib/translate";
+
+// Hidden div for Google Translate element
+if (typeof document !== "undefined" && !document.getElementById("google_translate_element")) {
+  const div = document.createElement("div");
+  div.id = "google_translate_element";
+  div.style.display = "none";
+  document.body.appendChild(div);
+}
 
 function Router() {
   return (
@@ -43,14 +54,26 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Initialize Google Translate
+  useEffect(() => {
+    initializeGoogleTranslate();
+  }, []);
+
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
-        <TooltipProvider>
-          <Toaster />
-          {loading && <LoadingScreen fadeOut={fadeOut} />}
-          {!loading && <Router />}
-        </TooltipProvider>
+        <LanguageProvider>
+          <TooltipProvider>
+            <Toaster />
+            {loading && <LoadingScreen fadeOut={fadeOut} />}
+            {!loading && (
+              <>
+                <Router />
+                <TranslationPrompt />
+              </>
+            )}
+          </TooltipProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

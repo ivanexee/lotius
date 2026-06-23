@@ -19,12 +19,18 @@ interface ThemeProviderProps {
 export function ThemeProvider({
   children,
   defaultTheme = "light",
-  switchable = false,
+  switchable = true,
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
-    if (switchable) {
-      const stored = localStorage.getItem("theme");
-      return (stored as Theme) || defaultTheme;
+    // Check for stored preference first
+    const stored = localStorage.getItem("theme");
+    if (stored) return (stored as Theme);
+    
+    // Detect system preference
+    if (typeof window !== "undefined" && window.matchMedia) {
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        return "dark";
+      }
     }
     return defaultTheme;
   });
@@ -42,9 +48,40 @@ export function ThemeProvider({
     }
   }, [theme, switchable]);
 
+  // Listen for system theme changes
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    
+    const handleChange = (e: MediaQueryListEvent) => {
+      // Only auto-switch if user hasn't manually toggled theme
+      const hasManualPreference = localStorage.getItem("theme-manual");
+      if (!hasManualPreference) {
+        setTheme(e.matches ? "dark" : "light");
+      }
+    };
+
+    // Modern browsers
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+    // Fallback for older browsers
+    else if ((mediaQuery as any).addListener) {
+      (mediaQuery as any).addListener(handleChange);
+      return () => (mediaQuery as any).removeListener(handleChange);
+    }
+  }, []);
+
   const toggleTheme = switchable
     ? () => {
-        setTheme(prev => (prev === "light" ? "dark" : "light"));
+        setTheme(prev => {
+          const newTheme = prev === "light" ? "dark" : "light";
+          // Mark that user manually changed theme
+          localStorage.setItem("theme-manual", "true");
+          return newTheme;
+        });
       }
     : undefined;
 
