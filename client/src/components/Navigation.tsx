@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Instagram } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const mainLinks = [
   { label: "HOME", href: "/" },
@@ -18,6 +19,8 @@ const seasonLinks = [
 ];
 
 export default function Navigation() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const [open, setOpen] = useState(false);
   const [location] = useLocation();
 
@@ -165,10 +168,11 @@ export default function Navigation() {
         style={{
           position: "fixed",
           inset: 0,
-          background: "#fff",
-          zIndex: 200,
-          transform: open ? "translateX(0)" : "translateX(-100%)",
-          transition: "transform 480ms cubic-bezier(0.23, 1, 0.32, 1)",
+        background: isDark ? "oklch(0.08 0 0)" : "#fff",
+        color: isDark ? "oklch(0.97 0 0)" : "oklch(0.08 0 0)",
+        zIndex: 200,
+        transform: open ? "translateX(0)" : "translateX(-100%)",
+        transition: "transform 480ms cubic-bezier(0.23, 1, 0.32, 1), background-color 450ms cubic-bezier(0.23,1,0.32,1)",
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
@@ -229,18 +233,22 @@ export default function Navigation() {
                     lineHeight: 1.25,
                     paddingTop: "0.4rem",
                     paddingBottom: "0.4rem",
-                    color: location === link.href ? "oklch(0.08 0 0)" : "oklch(0.08 0 0 / 0.3)",
+                    color: location === link.href
+                      ? (isDark ? "oklch(0.97 0 0)" : "oklch(0.08 0 0)")
+                      : (isDark ? "oklch(0.97 0 0 / 0.35)" : "oklch(0.08 0 0 / 0.3)"),
                     transition: "color 200ms, transform 200ms",
                     display: "block",
                     animation: open ? `staggerIn 500ms cubic-bezier(0.23,1,0.32,1) ${i * 55}ms both` : "none",
                     cursor: "pointer",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.color = "oklch(0.08 0 0)";
+                    e.currentTarget.style.color = isDark ? "oklch(0.97 0 0)" : "oklch(0.08 0 0)";
                     e.currentTarget.style.transform = "translateX(6px)";
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.color = location === link.href ? "oklch(0.08 0 0)" : "oklch(0.08 0 0 / 0.3)";
+                    e.currentTarget.style.color = location === link.href
+                      ? (isDark ? "oklch(0.97 0 0)" : "oklch(0.08 0 0)")
+                      : (isDark ? "oklch(0.97 0 0 / 0.35)" : "oklch(0.08 0 0 / 0.3)");
                     e.currentTarget.style.transform = "translateX(0)";
                   }}
                 >
@@ -282,7 +290,7 @@ export default function Navigation() {
                       fontWeight: 300,
                       fontSize: "clamp(20px, 3.5vw, 32px)",
                       letterSpacing: "0.08em",
-                      color: "rgba(0,0,0,0.5)",
+                      color: isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.5)",
                       transition: "color 200ms, transform 200ms",
                       display: "block",
                       animation: open ? `staggerIn 500ms cubic-bezier(0.23,1,0.32,1) ${380 + i * 50}ms both` : "none",
@@ -293,9 +301,9 @@ export default function Navigation() {
                       e.currentTarget.style.transform = "translateX(6px)";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.color = "rgba(0,0,0,0.5)";
-                      e.currentTarget.style.transform = "translateX(0)";
-                    }}
+                    e.currentTarget.style.color = isDark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.5)";
+                    e.currentTarget.style.transform = "translateX(0)";
+                  }}
                   >
                     {s.label}
                   </span>
@@ -332,7 +340,7 @@ export default function Navigation() {
                 fontWeight: 400,
                 fontSize: "clamp(18px, 3vw, 28px)",
                 letterSpacing: "0.04em",
-                color: "rgba(0,0,0,0.7)",
+                color: isDark ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.7)",
                 textDecoration: "none",
                 display: "inline-flex",
                 alignItems: "center",
@@ -341,13 +349,13 @@ export default function Navigation() {
                 cursor: "pointer",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = "oklch(0.08 0 0)";
-                e.currentTarget.style.transform = "translateX(6px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = "rgba(0,0,0,0.7)";
-                e.currentTarget.style.transform = "translateX(0)";
-              }}
+              e.currentTarget.style.color = isDark ? "oklch(0.97 0 0)" : "oklch(0.08 0 0)";
+              e.currentTarget.style.transform = "translateX(6px)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = isDark ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.7)";
+              e.currentTarget.style.transform = "translateX(0)";
+            }}
             >
               {/* Mail icon */}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>

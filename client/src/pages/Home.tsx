@@ -4,6 +4,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import SeasonalParticles from "@/components/SeasonalParticles";
 import OceanWaves from "@/components/OceanWaves";
+import { useTheme } from "@/contexts/ThemeContext";
 
 /* ─── Data ─── */
 const finalists = [
@@ -310,7 +311,18 @@ function CollectionCard({
 }
 
 /* ─── Floating 3D Collection Carousel ─── */
+
+// Dark mode versions of seasonal backgrounds — desaturated, deeper
+const darkBgColors: Record<string, string> = {
+  spring: "oklch(0.13 0.012 350)",
+  summer: "oklch(0.12 0.015 220)",
+  fall:   "oklch(0.13 0.010 50)",
+  winter: "oklch(0.12 0.012 230)",
+};
+
 function CollectionCarousel({ collection, index }: { collection: typeof collections[0]; index: number }) {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const [active, setActive] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const total = collection.images.length;
@@ -383,8 +395,8 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
         justifyContent: "center",
         overflow: "hidden",
         padding: "6rem 0",
-        background: collection.bgColor,
-        transition: "background 1.2s cubic-bezier(0.23, 1, 0.32, 1)",
+        background: isDark ? darkBgColors[collection.seasonKey] : collection.bgColor,
+        transition: "background 450ms cubic-bezier(0.23, 1, 0.32, 1)",
       }}
     >
       {isSummer && <OceanWaves active={inView} scrollProgress={scrollProgress} />}
@@ -550,9 +562,11 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
               width: i === active ? 24 : 6,
               height: 6,
               borderRadius: 3,
-              background: i === active ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.12)",
+              background: i === active
+                ? (isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.6)")
+                : (isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)"),
               border: "none",
-              transition: "all 400ms cubic-bezier(0.23,1,0.32,1)",
+              transition: "all 400ms cubic-bezier(0.23,1,0.32,1), background 450ms cubic-bezier(0.23,1,0.32,1)",
               cursor: "pointer",
             }}
           />
@@ -564,6 +578,8 @@ function CollectionCarousel({ collection, index }: { collection: typeof collecti
 
 /* ─── Main Component ─── */
 export default function Home() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -605,6 +621,7 @@ export default function Home() {
       {/* Hero */}
       <section
         ref={heroRef}
+        data-section="hero"
         onMouseMove={handleHeroMouseMove}
         onMouseLeave={handleHeroMouseLeave}
         style={{
@@ -828,7 +845,7 @@ export default function Home() {
       </section>
 
       {/* Intro */}
-      <section style={{ padding: "10rem 0", background: "#0d0d0d" }}>
+      <section data-section="intro" style={{ padding: "10rem 0", background: "#0d0d0d" }}>
         <RevealSection>
           <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 2rem", textAlign: "center" }}>
             <p style={{ fontFamily: "'Bodoni Moda', serif", fontWeight: 400, fontSize: "clamp(18px, 3vw, 28px)", letterSpacing: "0.04em", lineHeight: 1.6, color: "rgba(255,255,255,0.75)" }}>
@@ -844,7 +861,7 @@ export default function Home() {
       ))}
 
       {/* About Me */}
-      <section style={{ padding: "8rem 0", background: "#fff", borderTop: "0.5px solid rgba(0,0,0,0.08)" }}>
+      <section data-section="about" style={{ padding: "8rem 0", background: isDark ? "oklch(0.1 0 0)" : "#fff", borderTop: `0.5px solid ${isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)"}`, transition: "background 450ms cubic-bezier(0.23,1,0.32,1), border-color 450ms cubic-bezier(0.23,1,0.32,1)" }}>
         <RevealSection>
           <div style={{ maxWidth: 700, margin: "0 auto", padding: "0 2rem", textAlign: "center" }}>
             <span className="label-caps" style={{ opacity: 0.4, display: "block", marginBottom: "2rem" }}>
@@ -867,8 +884,9 @@ export default function Home() {
                 fontWeight: 300,
                 fontSize: "clamp(16px, 2vw, 20px)",
                 lineHeight: 1.8,
-                color: "rgba(0,0,0,0.65)",
+                color: isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.65)",
                 marginBottom: "3rem",
+                transition: "color 450ms cubic-bezier(0.23,1,0.32,1)",
               }}
             >
                             creativity behind it, clothing inspo, etc.
@@ -886,21 +904,21 @@ export default function Home() {
                 fontSize: 11,
                 letterSpacing: "0.3em",
                 textTransform: "uppercase",
-                color: "rgba(0,0,0,0.7)",
+                color: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)",
                 textDecoration: "none",
                 padding: "1rem 2rem",
-                border: "0.5px solid rgba(0,0,0,0.2)",
-                transition: "all 300ms cubic-bezier(0.23, 1, 0.32, 1)",
+                border: `0.5px solid ${isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)"}`,
+                transition: "all 300ms cubic-bezier(0.23, 1, 0.32, 1), color 450ms cubic-bezier(0.23,1,0.32,1), border-color 450ms cubic-bezier(0.23,1,0.32,1)",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(0,0,0,0.9)";
-                e.currentTarget.style.color = "#fff";
-                e.currentTarget.style.borderColor = "rgba(0,0,0,0.9)";
+                e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.9)" : "rgba(0,0,0,0.9)";
+                e.currentTarget.style.color = isDark ? "#000" : "#fff";
+                e.currentTarget.style.borderColor = isDark ? "rgba(255,255,255,0.9)" : "rgba(0,0,0,0.9)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.background = "transparent";
-                e.currentTarget.style.color = "rgba(0,0,0,0.7)";
-                e.currentTarget.style.borderColor = "rgba(0,0,0,0.2)";
+                e.currentTarget.style.color = isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)";
+                e.currentTarget.style.borderColor = isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)";
               }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -912,7 +930,7 @@ export default function Home() {
             </a>
 
             <div style={{ marginTop: "2rem" }}>
-              <p style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: 14, color: "rgba(0,0,0,0.4)", letterSpacing: "0.05em" }}>
+              <p style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: 14, color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.4)", letterSpacing: "0.05em", transition: "color 450ms cubic-bezier(0.23,1,0.32,1)" }}>
                 Follow for behind-the-scenes, new collections, and creative inspiration.
               </p>
             </div>
@@ -921,13 +939,13 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section style={{ padding: "8rem 0", background: "#faf8f5" }}>
+      <section data-section="cta" style={{ padding: "8rem 0", background: isDark ? "oklch(0.12 0 0)" : "#faf8f5", transition: "background 450ms cubic-bezier(0.23,1,0.32,1)" }}>
         <RevealSection>
           <div style={{ textAlign: "center" }}>
             <h2 style={{ fontFamily: "'Bodoni Moda', serif", fontWeight: 400, fontSize: "clamp(32px, 6vw, 64px)", letterSpacing: "-0.02em", marginBottom: "2rem" }}>
               Empower the confidence
             </h2>
-            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "clamp(14px, 1.8vw, 18px)", lineHeight: 1.7, maxWidth: 600, margin: "0 auto 3rem", color: "rgba(0,0,0,0.6)" }}>
+            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "clamp(14px, 1.8vw, 18px)", lineHeight: 1.7, maxWidth: 600, margin: "0 auto 3rem", color: isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.6)", transition: "color 450ms cubic-bezier(0.23,1,0.32,1)" }}>
               Discover the laureates, meet the council, and learn about our
               commitment to nurturing the next generation of fashion visionaries.
             </p>

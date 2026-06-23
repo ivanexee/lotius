@@ -71,6 +71,38 @@
   --ease-in-out-luxury: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
+/* ============================================================
+   DARK MODE VARIABLES
+   Inverted monochromatic palette — pure black base, white type
+   ============================================================ */
+.dark {
+  --background: oklch(0.08 0 0);
+  --foreground: oklch(0.97 0 0);
+  --card: oklch(0.11 0 0);
+  --card-foreground: oklch(0.97 0 0);
+  --popover: oklch(0.11 0 0);
+  --popover-foreground: oklch(0.97 0 0);
+  --primary: oklch(0.97 0 0);
+  --primary-foreground: oklch(0.08 0 0);
+  --secondary: oklch(0.15 0 0);
+  --secondary-foreground: oklch(0.97 0 0);
+  --muted: oklch(0.15 0 0);
+  --muted-foreground: oklch(0.6 0 0);
+  --accent: oklch(0.15 0 0);
+  --accent-foreground: oklch(0.97 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.22 0 0);
+  --input: oklch(0.22 0 0);
+  --ring: oklch(0.97 0 0);
+
+  /* Lotius dark tokens */
+  --bone: oklch(0.14 0.004 65);
+  --bone-dark: oklch(0.18 0.005 65);
+  --ghost: oklch(1 0 0 / 0.07);
+  --subtle: oklch(1 0 0 / 0.22);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -87,6 +119,9 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    /* Smooth background transition on theme switch */
+    transition: background-color 400ms cubic-bezier(0.23, 1, 0.32, 1),
+                color 400ms cubic-bezier(0.23, 1, 0.32, 1);
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -104,6 +139,61 @@
     background: oklch(0.08 0 0);
     color: oklch(1 0 0);
   }
+}
+
+/* ============================================================
+   GLOBAL THEME TRANSITION
+   Applied when .theme-transitioning class is on <html>
+   Smoothly cross-fades ALL color properties across the entire DOM
+   ============================================================ */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition:
+    background-color 450ms cubic-bezier(0.23, 1, 0.32, 1),
+    color 450ms cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 450ms cubic-bezier(0.23, 1, 0.32, 1),
+    fill 450ms cubic-bezier(0.23, 1, 0.32, 1),
+    stroke 450ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 450ms cubic-bezier(0.23, 1, 0.32, 1),
+    opacity 300ms cubic-bezier(0.23, 1, 0.32, 1) !important;
+  /* Preserve existing transform/motion transitions */
+  transition-property:
+    background-color,
+    color,
+    border-color,
+    fill,
+    stroke,
+    box-shadow,
+    opacity !important;
+}
+
+/* Dark mode overrides for hard-coded component colors */
+.dark .nav-overlay {
+  background: oklch(0.08 0 0);
+}
+
+.dark .loading-screen {
+  background: oklch(0.08 0 0);
+}
+
+.dark .hairline {
+  border-top-color: oklch(1 0 0 / 0.15);
+}
+
+.dark .btn-lotius {
+  border-color: oklch(0.97 0 0);
+  color: oklch(0.97 0 0);
+}
+
+.dark .btn-lotius:hover {
+  background: oklch(0.97 0 0);
+  color: oklch(0.08 0 0);
+}
+
+.dark .collection-section {
+  border-top-color: rgba(255,255,255,0.06);
 }
 
 @layer components {
@@ -333,4 +423,92 @@ html {
 
 .collection-section {
   scroll-snap-align: start;
+}
+
+/* ============================================================
+   DARK MODE — SECTION-LEVEL OVERRIDES
+   These target the hard-coded inline backgrounds/colors in
+   Home.tsx and inner pages that can't use CSS vars directly.
+   All transitions are handled by .theme-transitioning above.
+   ============================================================ */
+
+/* Hero section — already dark (#080808), stays the same */
+.dark [data-section="hero"] {
+  background: #050505 !important;
+}
+
+/* Intro section — dark background, stays near-black */
+.dark [data-section="intro"] {
+  background: #0a0a0a !important;
+}
+
+/* About section — white in light → near-black in dark */
+.dark [data-section="about"] {
+  background: oklch(0.1 0 0) !important;
+  border-top-color: rgba(255,255,255,0.07) !important;
+}
+
+/* CTA section — bone/off-white in light → dark charcoal in dark */
+.dark [data-section="cta"] {
+  background: oklch(0.12 0 0) !important;
+}
+
+/* Seasonal collection sections — desaturated dark versions */
+.dark [data-section="spring"] {
+  background: oklch(0.13 0.005 350) !important;
+}
+.dark [data-section="summer"] {
+  background: oklch(0.12 0.008 220) !important;
+}
+.dark [data-section="fall"] {
+  background: oklch(0.13 0.006 50) !important;
+}
+.dark [data-section="winter"] {
+  background: oklch(0.12 0.006 230) !important;
+}
+
+/* Navigation overlay — white in light → near-black in dark */
+.dark [data-nav="overlay"] {
+  background: oklch(0.08 0 0) !important;
+}
+
+/* Inner pages (Discover, Laureates, Council, Mentors) */
+.dark [data-page="inner"] {
+  background: oklch(0.09 0 0) !important;
+  color: oklch(0.92 0 0) !important;
+}
+
+/* Footer */
+.dark [data-section="footer"] {
+  background: oklch(0.06 0 0) !important;
+  border-top-color: rgba(255,255,255,0.07) !important;
+}
+
+/* Text color inversions for hard-coded rgba(0,0,0,...) values */
+.dark .text-dark-muted {
+  color: rgba(255,255,255,0.55) !important;
+}
+
+.dark .text-dark-subtle {
+  color: rgba(255,255,255,0.35) !important;
+}
+
+/* Border inversions */
+.dark .border-dark {
+  border-color: rgba(255,255,255,0.08) !important;
+}
+
+/* Instagram/contact link in about section */
+.dark [data-link="instagram"] {
+  color: rgba(255,255,255,0.7) !important;
+  border-color: rgba(255,255,255,0.2) !important;
+}
+
+/* Smooth transition on all section backgrounds when theme changes */
+[data-section],
+[data-page],
+[data-nav] {
+  transition: background-color 450ms cubic-bezier(0.23, 1, 0.32, 1),
+              color 450ms cubic-bezier(0.23, 1, 0.32, 1),
+              border-color 450ms cubic-bezier(0.23, 1, 0.32, 1) !important;
 }

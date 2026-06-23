@@ -5,6 +5,7 @@
 import { useEffect, useRef } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { useTheme } from "@/contexts/ThemeContext";
 
 function useScrollReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -35,14 +36,15 @@ function RevealSection({ children, delay = 0 }: { children: React.ReactNode; del
   );
 }
 
-const WIPBlock = ({ label, note }: { label: string; note?: string }) => (
+const WIPBlock = ({ label, note, isDark }: { label: string; note?: string; isDark?: boolean }) => (
   <div
     style={{
-      border: "1px dashed rgba(0,0,0,0.18)",
+      border: `1px dashed ${isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.18)"}`,
       borderRadius: 4,
       padding: "clamp(2rem, 5vw, 3.5rem) clamp(1.5rem, 4vw, 3rem)",
       textAlign: "center",
-      background: "rgba(0,0,0,0.015)",
+      background: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.015)",
+      transition: "background 450ms cubic-bezier(0.23,1,0.32,1), border-color 450ms cubic-bezier(0.23,1,0.32,1)",
     }}
   >
     <p
@@ -52,8 +54,9 @@ const WIPBlock = ({ label, note }: { label: string; note?: string }) => (
         fontSize: "clamp(11px, 1.4vw, 13px)",
         letterSpacing: "0.18em",
         textTransform: "uppercase",
-        color: "rgba(0,0,0,0.3)",
+        color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)",
         marginBottom: note ? "0.5rem" : 0,
+        transition: "color 450ms cubic-bezier(0.23,1,0.32,1)",
       }}
     >
       ✦ {label} ✦
@@ -64,9 +67,10 @@ const WIPBlock = ({ label, note }: { label: string; note?: string }) => (
           fontFamily: "'Cormorant Garamond', serif",
           fontWeight: 300,
           fontSize: "clamp(12px, 1.5vw, 14px)",
-          color: "rgba(0,0,0,0.22)",
+          color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.22)",
           letterSpacing: "0.06em",
           fontStyle: "italic",
+          transition: "color 450ms cubic-bezier(0.23,1,0.32,1)",
         }}
       >
         {note}
@@ -75,13 +79,15 @@ const WIPBlock = ({ label, note }: { label: string; note?: string }) => (
   </div>
 );
 
-const SectionDivider = () => (
-  <div style={{ width: "100%", height: 1, background: "rgba(0,0,0,0.08)", margin: "clamp(3rem, 6vw, 5rem) 0" }} />
+const SectionDivider = ({ isDark }: { isDark?: boolean }) => (
+  <div style={{ width: "100%", height: 1, background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)", margin: "clamp(3rem, 6vw, 5rem) 0", transition: "background 450ms cubic-bezier(0.23,1,0.32,1)" }} />
 );
 
 export default function Discover() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   return (
-    <div style={{ minHeight: "100vh", background: "#fafaf8", color: "#111" }}>
+    <div data-page="inner" style={{ minHeight: "100vh", background: isDark ? "oklch(0.09 0 0)" : "#fafaf8", color: isDark ? "oklch(0.92 0 0)" : "#111", transition: "background 450ms cubic-bezier(0.23,1,0.32,1), color 450ms cubic-bezier(0.23,1,0.32,1)" }}>
       <Navigation />
 
       {/* Page Header */}
@@ -91,7 +97,8 @@ export default function Discover() {
           paddingBottom: "clamp(3rem, 6vw, 5rem)",
           paddingLeft: "clamp(1.5rem, 6vw, 8rem)",
           paddingRight: "clamp(1.5rem, 6vw, 8rem)",
-          borderBottom: "1px solid rgba(0,0,0,0.08)",
+          borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.08)"}`,
+          transition: "border-color 450ms cubic-bezier(0.23,1,0.32,1)",
         }}
       >
         <RevealSection>
@@ -102,8 +109,9 @@ export default function Discover() {
               fontSize: "clamp(10px, 1.2vw, 12px)",
               letterSpacing: "0.22em",
               textTransform: "uppercase",
-              color: "rgba(0,0,0,0.4)",
+              color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)",
               marginBottom: "1.5rem",
+              transition: "color 450ms cubic-bezier(0.23,1,0.32,1)",
             }}
           >
             Lotius — Discover
@@ -149,10 +157,11 @@ export default function Discover() {
           <WIPBlock
             label="Add prompt here"
             note="Mission statement, brand origin, creative philosophy — work in progress"
+            isDark={isDark}
           />
         </RevealSection>
 
-        <SectionDivider />
+        <SectionDivider isDark={isDark} />
 
         {/* Materials / Awards */}
         <RevealSection delay={100}>
@@ -180,12 +189,13 @@ export default function Discover() {
                 key={label}
                 label={`${label} — Add prompt here`}
                 note="Fabric name, sourcing, texture description"
+                isDark={isDark}
               />
             ))}
           </div>
         </RevealSection>
 
-        <SectionDivider />
+        <SectionDivider isDark={isDark} />
 
         {/* Timeline */}
         <RevealSection delay={100}>
@@ -207,12 +217,13 @@ export default function Discover() {
                 key={step}
                 label={`${step} — Add prompt here`}
                 note={`Timeline milestone ${i + 1} — date, event, description`}
+                isDark={isDark}
               />
             ))}
           </div>
         </RevealSection>
 
-        <SectionDivider />
+        <SectionDivider isDark={isDark} />
 
         {/* Team / People */}
         <RevealSection delay={100}>
@@ -231,10 +242,11 @@ export default function Discover() {
           <WIPBlock
             label="Add prompt here"
             note="Team portraits, collaborators, modeling credits — work in progress"
+            isDark={isDark}
           />
         </RevealSection>
 
-        <SectionDivider />
+        <SectionDivider isDark={isDark} />
 
         {/* CTA */}
         <RevealSection delay={100}>
@@ -253,6 +265,7 @@ export default function Discover() {
             <WIPBlock
               label="Add prompt here"
               note="CTA copy, call-to-action description — work in progress"
+              isDark={isDark}
             />
           </div>
         </RevealSection>
