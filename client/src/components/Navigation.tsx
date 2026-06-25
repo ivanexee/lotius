@@ -123,24 +123,19 @@ export default function Navigation() {
           />
         </button>
 
-        {/* Centered logo — hand-drawn wordmark */}
-        <Link href="/">
-          <img
-            src="/manus-storage/lotius-logo-cross_b53774c0.png"
-            alt="lotius"
-            style={{
-              height: "clamp(28px, 4vw, 40px)",
-              width: "auto",
-              display: "block",
-              position: "absolute",
-              left: "50%",
-              top: "50%",
-              transform: "translate(-50%, -50%)",
-              zIndex: 51,
-              filter: isDark ? "invert(1)" : "none",
-              transition: "filter 450ms cubic-bezier(0.23,1,0.32,1)",
-            }}
-          />
+        {/* Centered logo — hand-drawn wordmark SVG with dark mode color switching */}
+        <Link href="/" style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)", zIndex: 51 }}>
+          <svg viewBox="0 0 391 708" width="clamp(28px, 4vw, 40px)" height="auto" style={{ display: "block" }}>
+            <path d="M 35 20 L 35 680" stroke={isDark ? "white" : "black"} strokeWidth="18" fill="none" strokeLinecap="round" style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }} />
+            <path d="M 195 80 L 195 650" stroke={isDark ? "white" : "black"} strokeWidth="18" fill="none" strokeLinecap="round" style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }} />
+            <path d="M 110 300 L 280 300" stroke={isDark ? "white" : "black"} strokeWidth="18" fill="none" strokeLinecap="round" style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }} />
+            <circle cx="135" cy="380" r="35" stroke={isDark ? "white" : "black"} strokeWidth="16" fill="none" style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }} />
+            <path d="M 195 280 L 195 450" stroke={isDark ? "white" : "black"} strokeWidth="14" fill="none" strokeLinecap="round" style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }} />
+            <circle cx="195" cy="240" r="8" fill={isDark ? "white" : "black"} style={{ transition: "fill 450ms cubic-bezier(0.23,1,0.32,1)" }} />
+            <path d="M 240 330 L 240 420 Q 240 450 270 450 L 270 330" stroke={isDark ? "white" : "black"} strokeWidth="14" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }} />
+            <path d="M 310 350 Q 310 330 330 330 Q 350 330 350 350 Q 350 370 330 370 Q 310 370 310 390 Q 310 410 330 410 Q 350 410 350 430" stroke={isDark ? "white" : "black"} strokeWidth="14" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }} />
+            <path d="M 215 200 L 235 180" stroke={isDark ? "white" : "black"} strokeWidth="12" fill="none" strokeLinecap="round" style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }} />
+          </svg>
         </Link>
 
         {/* Right: Instagram + theme toggle + language */}
@@ -247,17 +242,17 @@ export default function Navigation() {
           {/* Invisible spacer matching hamburger width */}
           <div style={{ width: 32 }} />
           <Link href="/" onClick={() => setOpen(false)}>
-            <img
-              src="/manus-storage/lotius-logo-cross_b53774c0.png"
-              alt="lotius"
-              style={{
-                height: "clamp(28px, 4vw, 40px)",
-                width: "auto",
-                display: "block",
-                filter: isDark ? "invert(1)" : "none",
-                transition: "filter 450ms cubic-bezier(0.23,1,0.32,1)",
-              }}
-            />
+            <svg viewBox="0 0 391 708" width="clamp(28px, 4vw, 40px)" height="auto" style={{ display: "block" }}>
+              <path d="M 35 20 L 35 680" stroke={isDark ? "white" : "black"} strokeWidth="18" fill="none" strokeLinecap="round" style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }} />
+              <path d="M 195 80 L 195 650" stroke={isDark ? "white" : "black"} strokeWidth="18" fill="none" strokeLinecap="round" style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }} />
+              <path d="M 110 300 L 280 300" stroke={isDark ? "white" : "black"} strokeWidth="18" fill="none" strokeLinecap="round" style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }} />
+              <circle cx="135" cy="380" r="35" stroke={isDark ? "white" : "black"} strokeWidth="16" fill="none" style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }} />
+              <path d="M 195 280 L 195 450" stroke={isDark ? "white" : "black"} strokeWidth="14" fill="none" strokeLinecap="round" style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }} />
+              <circle cx="195" cy="240" r="8" fill={isDark ? "white" : "black"} style={{ transition: "fill 450ms cubic-bezier(0.23,1,0.32,1)" }} />
+              <path d="M 240 330 L 240 420 Q 240 450 270 450 L 270 330" stroke={isDark ? "white" : "black"} strokeWidth="14" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }} />
+              <path d="M 310 350 Q 310 330 330 330 Q 350 330 350 350 Q 350 370 330 370 Q 310 370 310 390 Q 310 410 330 410 Q 350 410 350 430" stroke={isDark ? "white" : "black"} strokeWidth="14" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }} />
+              <path d="M 215 200 L 235 180" stroke={isDark ? "white" : "black"} strokeWidth="12" fill="none" strokeLinecap="round" style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }} />
+            </svg>
           </Link>
           <div className="flex items-center gap-1" style={{ fontSize: 10, letterSpacing: "0.2em" }}>
             <span style={{ opacity: 0.4 }}>FR</span>
