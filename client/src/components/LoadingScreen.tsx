@@ -1,8 +1,8 @@
 /**
  * LoadingScreen — Lotius
  * Uses an inline SVG hand-drawn 'lotius' logo as the centrepiece.
- * The logo fades in, gently pulses, and the progress counter counts up.
- * Adapts: dark mode → logo inverted to white; light mode → black ink.
+ * The logo fades in, animates with draw effect, and the progress counter counts up.
+ * Adapts: dark mode → logo white; light mode → logo black.
  */
 import { useEffect, useRef } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -47,6 +47,10 @@ export default function LoadingScreen({ fadeOut }: LoadingScreenProps) {
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   }, [isDark]);
 
+  // SVG stroke color based on theme
+  const strokeColor = isDark ? "white" : "black";
+  const fillColor = isDark ? "white" : "black";
+
   return (
     <div
       className={`loading-screen${fadeOut ? " fade-out" : ""}`}
@@ -56,45 +60,109 @@ export default function LoadingScreen({ fadeOut }: LoadingScreenProps) {
         transition: "background 450ms cubic-bezier(0.23,1,0.32,1)",
       }}
     >
-      {/* Hand-drawn logo — inline SVG with dark mode inversion */}
+      {/* Hand-drawn logo — inline SVG with theme-aware colors */}
       <svg
         viewBox="0 0 391 708"
         width="clamp(180px, 38vw, 340px)"
         height="auto"
         style={{
           display: "block",
-          filter: isDark ? "invert(1)" : "none",
-          transition: "filter 450ms cubic-bezier(0.23,1,0.32,1), opacity 450ms cubic-bezier(0.23,1,0.32,1)",
-          animation: "logoBreath 3s ease-in-out infinite",
-          willChange: "transform, opacity",
+          transition: "opacity 450ms cubic-bezier(0.23,1,0.32,1)",
+          animation: "logoDrawAndBreath 4s ease-in-out forwards",
+          willChange: "transform, opacity, stroke",
         }}
       >
         {/* Left vertical line */}
-        <path d="M 35 20 L 35 680" stroke="black" strokeWidth="18" fill="none" strokeLinecap="round" />
+        <path 
+          d="M 35 20 L 35 680" 
+          stroke={strokeColor} 
+          strokeWidth="18" 
+          fill="none" 
+          strokeLinecap="round"
+          style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }}
+        />
         
         {/* Center vertical line */}
-        <path d="M 195 80 L 195 650" stroke="black" strokeWidth="18" fill="none" strokeLinecap="round" />
+        <path 
+          d="M 195 80 L 195 650" 
+          stroke={strokeColor} 
+          strokeWidth="18" 
+          fill="none" 
+          strokeLinecap="round"
+          style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }}
+        />
         
         {/* Horizontal cross line */}
-        <path d="M 110 300 L 280 300" stroke="black" strokeWidth="18" fill="none" strokeLinecap="round" />
+        <path 
+          d="M 110 300 L 280 300" 
+          stroke={strokeColor} 
+          strokeWidth="18" 
+          fill="none" 
+          strokeLinecap="round"
+          style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }}
+        />
         
         {/* "o" circle */}
-        <circle cx="135" cy="380" r="35" stroke="black" strokeWidth="16" fill="none" />
+        <circle 
+          cx="135" 
+          cy="380" 
+          r="35" 
+          stroke={strokeColor} 
+          strokeWidth="16" 
+          fill="none"
+          style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }}
+        />
         
         {/* "t" vertical line */}
-        <path d="M 195 280 L 195 450" stroke="black" strokeWidth="14" fill="none" strokeLinecap="round" />
+        <path 
+          d="M 195 280 L 195 450" 
+          stroke={strokeColor} 
+          strokeWidth="14" 
+          fill="none" 
+          strokeLinecap="round"
+          style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }}
+        />
         
         {/* "i" dot */}
-        <circle cx="195" cy="240" r="8" fill="black" />
+        <circle 
+          cx="195" 
+          cy="240" 
+          r="8" 
+          fill={fillColor}
+          style={{ transition: "fill 450ms cubic-bezier(0.23,1,0.32,1)" }}
+        />
         
         {/* "u" curve */}
-        <path d="M 240 330 L 240 420 Q 240 450 270 450 L 270 330" stroke="black" strokeWidth="14" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <path 
+          d="M 240 330 L 240 420 Q 240 450 270 450 L 270 330" 
+          stroke={strokeColor} 
+          strokeWidth="14" 
+          fill="none" 
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+          style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }}
+        />
         
         {/* "s" curves */}
-        <path d="M 310 350 Q 310 330 330 330 Q 350 330 350 350 Q 350 370 330 370 Q 310 370 310 390 Q 310 410 330 410 Q 350 410 350 430" stroke="black" strokeWidth="14" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <path 
+          d="M 310 350 Q 310 330 330 330 Q 350 330 350 350 Q 350 370 330 370 Q 310 370 310 390 Q 310 410 330 410 Q 350 410 350 430" 
+          stroke={strokeColor} 
+          strokeWidth="14" 
+          fill="none" 
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+          style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }}
+        />
         
         {/* Small "l" accent */}
-        <path d="M 215 200 L 235 180" stroke="black" strokeWidth="12" fill="none" strokeLinecap="round" />
+        <path 
+          d="M 215 200 L 235 180" 
+          stroke={strokeColor} 
+          strokeWidth="12" 
+          fill="none" 
+          strokeLinecap="round"
+          style={{ transition: "stroke 450ms cubic-bezier(0.23,1,0.32,1)" }}
+        />
       </svg>
 
       {/* Progress counter */}
@@ -115,10 +183,27 @@ export default function LoadingScreen({ fadeOut }: LoadingScreenProps) {
       </span>
 
       <style>{`
-        @keyframes logoBreath {
-          0%   { transform: scale(1);       opacity: 0.88; }
-          50%  { transform: scale(1.018);   opacity: 1;    }
-          100% { transform: scale(1);       opacity: 0.88; }
+        @keyframes logoDrawAndBreath {
+          0% {
+            opacity: 0;
+            transform: scale(0.92);
+          }
+          15% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.02);
+            opacity: 1;
+          }
+          85% {
+            transform: scale(1);
+            opacity: 1;
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1);
+          }
         }
       `}</style>
     </div>
