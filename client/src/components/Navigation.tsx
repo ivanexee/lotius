@@ -123,23 +123,24 @@ export default function Navigation() {
           />
         </button>
 
-        {/* Centered logo */}
+        {/* Centered logo — hand-drawn wordmark */}
         <Link href="/">
-          <span
+          <img
+            src="/manus-storage/lotius-logo_59af43a2.png"
+            alt="lotius"
             style={{
-              fontFamily: "'Bodoni Moda', serif",
-              fontWeight: 400,
-              fontSize: "clamp(14px, 2vw, 18px)",
-              letterSpacing: "0.35em",
-              textTransform: "uppercase",
+              height: "clamp(28px, 4vw, 40px)",
+              width: "auto",
+              display: "block",
               position: "absolute",
               left: "50%",
-              transform: "translateX(-50%)",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
               zIndex: 51,
+              filter: isDark ? "invert(1)" : "none",
+              transition: "filter 450ms cubic-bezier(0.23,1,0.32,1)",
             }}
-          >
-            LOTIUS
-          </span>
+          />
         </Link>
 
         {/* Right: Instagram + theme toggle + language */}
@@ -246,17 +247,17 @@ export default function Navigation() {
           {/* Invisible spacer matching hamburger width */}
           <div style={{ width: 32 }} />
           <Link href="/" onClick={() => setOpen(false)}>
-            <span
+            <img
+              src="/manus-storage/lotius-logo_59af43a2.png"
+              alt="lotius"
               style={{
-                fontFamily: "'Bodoni Moda', serif",
-                fontWeight: 400,
-                fontSize: "clamp(14px, 2vw, 18px)",
-                letterSpacing: "0.35em",
-                textTransform: "uppercase",
+                height: "clamp(28px, 4vw, 40px)",
+                width: "auto",
+                display: "block",
+                filter: isDark ? "invert(1)" : "none",
+                transition: "filter 450ms cubic-bezier(0.23,1,0.32,1)",
               }}
-            >
-              LOTIUS
-            </span>
+            />
           </Link>
           <div className="flex items-center gap-1" style={{ fontSize: 10, letterSpacing: "0.2em" }}>
             <span style={{ opacity: 0.4 }}>FR</span>

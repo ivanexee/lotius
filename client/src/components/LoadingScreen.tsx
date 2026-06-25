@@ -1,10 +1,13 @@
 /**
  * LoadingScreen — Lotius
- * Design: Bodoni Moda wave animation, left-to-right letter illumination
- * Adapts text color to dark/light mode so letters are always visible.
+ * Uses the hand-drawn 'lotius' logo as the centrepiece.
+ * The logo fades in, gently pulses, and the progress counter counts up.
+ * Adapts: dark mode → logo inverted to white; light mode → black ink.
  */
 import { useEffect, useRef } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
+
+const LOGO_URL = "/manus-storage/lotius-logo_59af43a2.png";
 
 interface LoadingScreenProps {
   fadeOut: boolean;
@@ -14,21 +17,15 @@ export default function LoadingScreen({ fadeOut }: LoadingScreenProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  const lettersRef = useRef<HTMLSpanElement[]>([]);
-  const pctRef = useRef<HTMLSpanElement>(null);
+  const pctRef  = useRef<HTMLSpanElement>(null);
   const startRef = useRef<number | null>(null);
-  const rafRef = useRef<number | null>(null);
+  const rafRef   = useRef<number | null>(null);
   const DURATION = 5500;
-
-  // Base and full opacity values per theme
-  const baseAlpha = 0.07;
-  const fullAlpha = 0.93;
 
   const ease = (t: number) =>
     t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
   useEffect(() => {
-    // Re-run animation when theme changes so colors update immediately
     startRef.current = null;
 
     const tick = (now: number) => {
@@ -36,35 +33,21 @@ export default function LoadingScreen({ fadeOut }: LoadingScreenProps) {
       const t = Math.min((now - startRef.current) / DURATION, 1);
       const v = ease(t);
       const dark = document.documentElement.classList.contains("dark");
-      const channel = dark ? "255,255,255" : "0,0,0";
-
-      lettersRef.current.forEach((l, i) => {
-        if (!l) return;
-        const lp = Math.min(1, Math.max(0, v * lettersRef.current.length - i));
-        l.style.color = `rgba(${channel},${(baseAlpha + lp * fullAlpha).toFixed(3)})`;
-      });
 
       if (pctRef.current) {
         pctRef.current.textContent = Math.round(v * 100) + "%";
         pctRef.current.style.color = dark
-          ? `rgba(255,255,255,0.35)`
-          : `rgba(0,0,0,0.22)`;
+          ? "rgba(255,255,255,0.4)"
+          : "rgba(0,0,0,0.28)";
       }
 
-      if (t < 1) {
-        rafRef.current = requestAnimationFrame(tick);
-      }
+      if (t < 1) rafRef.current = requestAnimationFrame(tick);
     };
 
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     rafRef.current = requestAnimationFrame(tick);
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   }, [isDark]);
-
-  const letters = ["l", "o", "t", "i", "u", "s"];
-  const delays = [0, 0.14, 0.28, 0.42, 0.56, 0.70];
 
   return (
     <div
@@ -75,41 +58,33 @@ export default function LoadingScreen({ fadeOut }: LoadingScreenProps) {
         transition: "background 450ms cubic-bezier(0.23,1,0.32,1)",
       }}
     >
-      <div style={{ display: "flex", alignItems: "baseline" }}>
-        {letters.map((letter, i) => (
-          <span
-            key={i}
-            ref={(el) => {
-              if (el) lettersRef.current[i] = el;
-            }}
-            style={{
-              display: "inline-block",
-              fontFamily: "'Bodoni Moda', serif",
-              fontWeight: 400,
-              fontSize: "clamp(56px, 12vw, 96px)",
-              letterSpacing: "0.08em",
-              padding: "0 2px",
-              // Start dim in the correct theme color
-              color: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.07)",
-              willChange: "transform",
-              animation: `wv 1.9s ease-in-out infinite`,
-              animationDelay: `${delays[i]}s`,
-              transition: "color 300ms cubic-bezier(0.23,1,0.32,1)",
-            }}
-          >
-            {letter}
-          </span>
-        ))}
-      </div>
+      {/* Hand-drawn logo — inverted to white in dark mode */}
+      <img
+        src={LOGO_URL}
+        alt="lotius"
+        style={{
+          width: "clamp(180px, 38vw, 340px)",
+          height: "auto",
+          display: "block",
+          // Invert black ink to white when in dark mode
+          filter: isDark ? "invert(1)" : "none",
+          transition: "filter 450ms cubic-bezier(0.23,1,0.32,1), opacity 450ms cubic-bezier(0.23,1,0.32,1)",
+          animation: "logoBreath 3s ease-in-out infinite",
+          willChange: "transform, opacity",
+        }}
+      />
+
+      {/* Progress counter */}
       <span
         ref={pctRef}
         style={{
+          marginTop: "2.5rem",
           fontFamily: "'Bodoni Moda', serif",
           fontWeight: 400,
           fontSize: "11px",
           letterSpacing: "0.42em",
           textTransform: "uppercase",
-          color: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.22)",
+          color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.28)",
           transition: "color 300ms cubic-bezier(0.23,1,0.32,1)",
         }}
       >
@@ -117,12 +92,10 @@ export default function LoadingScreen({ fadeOut }: LoadingScreenProps) {
       </span>
 
       <style>{`
-        @keyframes wv {
-          0%   { transform: translateY(0); }
-          25%  { transform: translateY(-22px); }
-          50%  { transform: translateY(0); }
-          75%  { transform: translateY(11px); }
-          100% { transform: translateY(0); }
+        @keyframes logoBreath {
+          0%   { transform: scale(1);       opacity: 0.88; }
+          50%  { transform: scale(1.018);   opacity: 1;    }
+          100% { transform: scale(1);       opacity: 0.88; }
         }
       `}</style>
     </div>
