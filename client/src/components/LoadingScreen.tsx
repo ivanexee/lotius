@@ -7,7 +7,7 @@
 import { useEffect, useRef } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 
-const LOGO_URL = "/manus-storage/lotius-logo-full_c379305f.png";
+const LOGO_URL = "/manus-storage/lotius-logo_59af43a2.png";
 
 interface LoadingScreenProps {
   fadeOut: boolean;
