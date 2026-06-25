@@ -84,8 +84,6 @@ function AppContent() {
           {/* Paint Reveal overlay — sits above content and paints away */}
           {showPaintReveal && !revealComplete && (
             <PaintReveal
-              duration={2200}
-              darkOverlay={theme === "dark"}
               onComplete={handleRevealComplete}
             />
           )}
