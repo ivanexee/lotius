@@ -222,12 +222,16 @@ export default function PaintReveal({
   // ── Pointer move ──────────────────────────────────────────────────────────
   const handlePointerMove = useCallback(
     (e: MouseEvent | TouchEvent) => {
-      if (!isDrawingRef.current || isDone) return;
+      if (isDone) return;
       e.preventDefault();
 
       const canvas = canvasRef.current;
       if (!canvas) return;
       const ctx = canvas.getContext("2d")!;
+
+      // Hide hint on first movement
+      setHasStarted(true);
+      setShowHint(false);
 
       const touches = "touches" in e ? e.touches : null;
       const pointsToProcess = touches ? Array.from(touches) : [e as MouseEvent];
@@ -306,15 +310,12 @@ export default function PaintReveal({
 
     const canvas = canvasRef.current!;
 
-    // Mouse events
-    canvas.addEventListener("mousedown", handlePointerDown as EventListener);
+    // Mouse hover reveals — no click required
     window.addEventListener("mousemove", handlePointerMove as EventListener);
-    window.addEventListener("mouseup", handlePointerUp);
 
-    // Touch events
-    canvas.addEventListener("touchstart", handlePointerDown as EventListener, { passive: false });
-    window.addEventListener("touchmove", handlePointerMove as EventListener, { passive: false });
-    window.addEventListener("touchend", handlePointerUp);
+    // Touch drag reveals
+    canvas.addEventListener("touchmove", handlePointerMove as EventListener, { passive: false });
+    canvas.addEventListener("touchstart", handlePointerMove as EventListener, { passive: false });
 
     // Coverage check every 400ms — auto-complete when threshold reached
     coverageCheckRef.current = setInterval(() => {
@@ -335,12 +336,9 @@ export default function PaintReveal({
     window.addEventListener("resize", handleResize);
 
     return () => {
-      canvas.removeEventListener("mousedown", handlePointerDown as EventListener);
       window.removeEventListener("mousemove", handlePointerMove as EventListener);
-      window.removeEventListener("mouseup", handlePointerUp);
-      canvas.removeEventListener("touchstart", handlePointerDown as EventListener);
-      window.removeEventListener("touchmove", handlePointerMove as EventListener);
-      window.removeEventListener("touchend", handlePointerUp);
+      canvas.removeEventListener("touchmove", handlePointerMove as EventListener);
+      canvas.removeEventListener("touchstart", handlePointerMove as EventListener);
       window.removeEventListener("resize", handleResize);
       if (coverageCheckRef.current) clearInterval(coverageCheckRef.current);
       if (autoCompleteRef.current) clearTimeout(autoCompleteRef.current);
