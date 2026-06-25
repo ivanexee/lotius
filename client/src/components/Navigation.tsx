@@ -126,7 +126,7 @@ export default function Navigation() {
         {/* Centered logo — hand-drawn wordmark */}
         <Link href="/">
           <img
-            src="/manus-storage/lotius-logo-cross_a7f98b08.png"
+            src="/manus-storage/lotius-logo-cross_b53774c0.png"
             alt="lotius"
             style={{
               height: "clamp(28px, 4vw, 40px)",
@@ -248,7 +248,7 @@ export default function Navigation() {
           <div style={{ width: 32 }} />
           <Link href="/" onClick={() => setOpen(false)}>
             <img
-              src="/manus-storage/lotius-logo-cross_a7f98b08.png"
+              src="/manus-storage/lotius-logo-cross_b53774c0.png"
               alt="lotius"
               style={{
                 height: "clamp(28px, 4vw, 40px)",

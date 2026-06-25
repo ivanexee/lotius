@@ -7,7 +7,7 @@
 import { useEffect, useRef } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 
-const LOGO_URL = "/manus-storage/lotius-logo-cross_a7f98b08.png";
+const LOGO_URL = "/manus-storage/lotius-logo-cross_b53774c0.png";
 
 interface LoadingScreenProps {
   fadeOut: boolean;
@@ -54,7 +54,7 @@ export default function LoadingScreen({ fadeOut }: LoadingScreenProps) {
       className={`loading-screen${fadeOut ? " fade-out" : ""}`}
       aria-label="Lotius loading screen"
       style={{
-        background: isDark ? "oklch(0.08 0 0)" : "#fff",
+        background: "#fff",
         transition: "background 450ms cubic-bezier(0.23,1,0.32,1)",
       }}
     >
