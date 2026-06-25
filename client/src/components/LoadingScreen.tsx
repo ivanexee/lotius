@@ -1,13 +1,11 @@
 /**
  * LoadingScreen — Lotius
- * Uses the hand-drawn 'lotius' logo as the centrepiece.
+ * Uses an inline SVG hand-drawn 'lotius' logo as the centrepiece.
  * The logo fades in, gently pulses, and the progress counter counts up.
  * Adapts: dark mode → logo inverted to white; light mode → black ink.
  */
 import { useEffect, useRef } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
-
-const LOGO_URL = "/manus-storage/lotius-logo-cross_b53774c0.png";
 
 interface LoadingScreenProps {
   fadeOut: boolean;
@@ -58,21 +56,46 @@ export default function LoadingScreen({ fadeOut }: LoadingScreenProps) {
         transition: "background 450ms cubic-bezier(0.23,1,0.32,1)",
       }}
     >
-      {/* Hand-drawn logo — inverted to white in dark mode */}
-      <img
-        src={LOGO_URL}
-        alt="lotius"
+      {/* Hand-drawn logo — inline SVG with dark mode inversion */}
+      <svg
+        viewBox="0 0 391 708"
+        width="clamp(180px, 38vw, 340px)"
+        height="auto"
         style={{
-          width: "clamp(180px, 38vw, 340px)",
-          height: "auto",
           display: "block",
-          // Invert black ink to white when in dark mode
           filter: isDark ? "invert(1)" : "none",
           transition: "filter 450ms cubic-bezier(0.23,1,0.32,1), opacity 450ms cubic-bezier(0.23,1,0.32,1)",
           animation: "logoBreath 3s ease-in-out infinite",
           willChange: "transform, opacity",
         }}
-      />
+      >
+        {/* Left vertical line */}
+        <path d="M 35 20 L 35 680" stroke="black" strokeWidth="18" fill="none" strokeLinecap="round" />
+        
+        {/* Center vertical line */}
+        <path d="M 195 80 L 195 650" stroke="black" strokeWidth="18" fill="none" strokeLinecap="round" />
+        
+        {/* Horizontal cross line */}
+        <path d="M 110 300 L 280 300" stroke="black" strokeWidth="18" fill="none" strokeLinecap="round" />
+        
+        {/* "o" circle */}
+        <circle cx="135" cy="380" r="35" stroke="black" strokeWidth="16" fill="none" />
+        
+        {/* "t" vertical line */}
+        <path d="M 195 280 L 195 450" stroke="black" strokeWidth="14" fill="none" strokeLinecap="round" />
+        
+        {/* "i" dot */}
+        <circle cx="195" cy="240" r="8" fill="black" />
+        
+        {/* "u" curve */}
+        <path d="M 240 330 L 240 420 Q 240 450 270 450 L 270 330" stroke="black" strokeWidth="14" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        
+        {/* "s" curves */}
+        <path d="M 310 350 Q 310 330 330 330 Q 350 330 350 350 Q 350 370 330 370 Q 310 370 310 390 Q 310 410 330 410 Q 350 410 350 430" stroke="black" strokeWidth="14" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        
+        {/* Small "l" accent */}
+        <path d="M 215 200 L 235 180" stroke="black" strokeWidth="12" fill="none" strokeLinecap="round" />
+      </svg>
 
       {/* Progress counter */}
       <span
