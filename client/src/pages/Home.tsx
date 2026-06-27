@@ -4,6 +4,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import SeasonalParticles from "@/components/SeasonalParticles";
 import OceanWaves from "@/components/OceanWaves";
+import SectionCurtain from "@/components/SectionCurtain";
 import { useTheme } from "@/contexts/ThemeContext";
 
 /* ─── Data ─── */
@@ -883,10 +884,15 @@ export default function Home() {
         </RevealSection>
       </section>
 
-      {/* Collection Carousels */}
+      {/* Collection Carousels — curtain wipe fires between each section */}
       {collections.map((col, i) => (
-        <CollectionCarousel key={col.season} collection={col} index={i} />
+        <>
+          {i > 0 && <SectionCurtain key={`curtain-${col.id}`} color="oklch(0.08 0 0)" />}
+          <CollectionCarousel key={col.season} collection={col} index={i} />
+        </>
       ))}
+      {/* Curtain wipe before the About section */}
+      <SectionCurtain color="oklch(0.08 0 0)" />
 
       {/* About Me */}
       <section data-section="about" style={{ padding: "8rem 0", background: isDark ? "oklch(0.13 0.012 60)" : "#f5ede0", borderTop: `0.5px solid ${isDark ? "rgba(255,220,170,0.1)" : "rgba(160,120,70,0.12)"}`, transition: "background 450ms cubic-bezier(0.23,1,0.32,1), border-color 450ms cubic-bezier(0.23,1,0.32,1)" }}>
