@@ -26,13 +26,12 @@ const STAGGER     = 55;         // ms delay between each panel
 const EASE        = "cubic-bezier(0.76, 0, 0.24, 1)"; // sharp ease-in-out
 
 export default function PaintReveal({ onComplete }: PaintRevealProps) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
+  useTheme(); // keep context subscription for future use
   const containerRef = useRef<HTMLDivElement>(null);
   const doneRef = useRef(false);
 
-  // Warm paper tone matching the loading screen
-  const panelColor = isDark ? "#15120C" : "#F2EEE4";
+  // Hero near-black — creates a seamless dark-to-dark transition
+  const panelColor = "oklch(0.08 0 0)";
 
   useEffect(() => {
     if (doneRef.current) return;
