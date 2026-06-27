@@ -1,14 +1,46 @@
 /**
  * LoadingScreen — Lotius
- * Uses the hand-drawn 'lotius' logo as the centrepiece.
- * The logo fades in, gently pulses, and the progress counter counts up.
- * Adapts: dark mode → logo white; light mode → black ink.
+ * Wipe-in logo animation: vertical stem anchors first, then each letter
+ * reveals top-down in sequence. Progress bar + crop marks + grain texture.
+ * Adapts: dark mode → dark ink on dark paper; light mode → warm paper (#F2EEE4).
  */
 import { useEffect, useRef } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 
-// Inline SVG path traced from the hand-drawn lotius logo
-const LOGO_PATH = "M 201 312 L 198 312 L 193 314 L 189 320 L 189 330 L 191 340 L 190 394 L 191 396 L 195 399 L 201 399 L 203 398 L 206 395 L 208 388 L 206 372 L 206 319 L 204 314 Z M 285 311 L 282 310 L 279 311 L 275 314 L 272 319 L 272 326 L 276 336 L 278 344 L 279 361 L 278 368 L 274 378 L 272 381 L 266 386 L 257 386 L 249 382 L 244 376 L 241 369 L 241 352 L 246 334 L 246 323 L 243 319 L 241 318 L 237 318 L 231 320 L 226 324 L 224 328 L 224 330 L 226 332 L 235 333 L 234 343 L 231 351 L 229 361 L 228 375 L 232 388 L 235 392 L 240 396 L 247 399 L 253 400 L 258 400 L 269 397 L 278 392 L 284 386 L 289 378 L 294 363 L 295 357 L 295 343 L 292 324 L 289 315 Z M 103 309 L 98 308 L 88 308 L 77 312 L 66 319 L 57 328 L 52 338 L 50 347 L 50 355 L 52 364 L 57 374 L 61 379 L 70 386 L 77 389 L 81 390 L 93 390 L 103 387 L 109 384 L 115 380 L 124 371 L 129 362 L 131 354 L 131 341 L 128 331 L 123 323 L 114 314 Z M 83 322 L 93 322 L 100 325 L 109 334 L 112 339 L 114 345 L 114 360 L 111 367 L 104 374 L 100 376 L 90 376 L 82 373 L 73 365 L 68 356 L 67 352 L 67 339 L 71 330 L 76 325 Z M 356 281 L 342 281 L 335 283 L 329 286 L 319 295 L 315 301 L 312 310 L 312 326 L 315 336 L 327 355 L 337 367 L 347 381 L 356 398 L 359 408 L 359 422 L 356 430 L 347 438 L 344 439 L 333 439 L 326 437 L 321 434 L 315 428 L 313 425 L 311 419 L 312 410 L 314 406 L 320 400 L 321 398 L 320 396 L 313 395 L 304 402 L 301 406 L 297 415 L 296 420 L 296 429 L 297 433 L 300 439 L 307 446 L 319 452 L 325 453 L 334 453 L 348 449 L 357 444 L 362 440 L 368 432 L 373 422 L 375 413 L 375 404 L 373 394 L 369 384 L 359 367 L 331 329 L 326 315 L 326 308 L 329 300 L 333 296 L 340 293 L 349 294 L 353 296 L 358 301 L 360 305 L 360 311 L 358 314 L 359 319 L 365 319 L 369 315 L 372 310 L 373 306 L 373 294 L 371 290 L 367 286 L 362 283 Z M 212 178 L 207 178 L 202 183 L 190 200 L 187 206 L 187 211 L 189 213 L 200 213 L 222 208 L 224 206 L 223 202 L 221 201 L 212 201 L 205 203 L 202 202 L 202 200 L 214 184 L 214 180 Z M 161 43 L 158 43 L 155 45 L 153 48 L 151 60 L 150 77 L 149 147 L 151 238 L 150 240 L 145 244 L 106 242 L 99 245 L 97 247 L 94 255 L 95 260 L 97 261 L 103 261 L 117 258 L 132 257 L 148 257 L 151 260 L 151 541 L 149 629 L 149 669 L 150 686 L 151 689 L 154 692 L 159 692 L 163 689 L 166 681 L 166 577 L 164 430 L 165 260 L 169 257 L 193 257 L 225 259 L 235 258 L 242 255 L 247 249 L 247 243 L 244 240 L 231 240 L 206 243 L 168 243 L 165 240 L 166 127 L 165 49 L 163 44 Z M 21 15 L 15 22 L 15 84 L 17 164 L 17 283 L 15 404 L 17 448 L 19 455 L 22 457 L 25 457 L 29 454 L 31 450 L 33 439 L 33 397 L 31 359 L 31 149 L 33 79 L 33 46 L 31 19 L 30 17 L 27 15 Z";
+// ─── Logo data (paths, timing windows, geometry) ────────────────────────────
+const LOGO = {
+  vb: { x: -30, y: -20, w: 444, h: 740 },
+  glyphs: {
+    l:      { d: "M20.0 12.0L15.0 15.0L12.0 21.0L12.0 75.0L13.0 76.0L13.0 125.0L14.0 126.0L14.0 307.0L13.0 308.0L13.0 388.0L12.0 389.0L13.0 390.0L13.0 431.0L14.0 432.0L15.0 448.0L18.0 453.0L23.0 453.0L27.0 448.0L30.0 432.0L30.0 395.0L29.0 394.0L29.0 361.0L28.0 360.0L28.0 294.0L27.0 293.0L28.0 134.0L29.0 133.0L30.0 47.0L29.0 46.0L28.0 19.0L25.0 13.0Z", y0: 12,  y1: 453 },
+    o:      { d: "M99.0 306.0L87.0 305.0L79.0 307.0L73.0 310.0L61.0 318.0L56.0 323.0L49.0 335.0L47.0 344.0L47.0 352.0L50.0 363.0L53.0 369.0L63.0 380.0L75.0 386.0L89.0 387.0L97.0 385.0L105.0 381.0L118.0 371.0L122.0 366.0L127.0 355.0L128.0 338.0L123.0 325.0L113.0 313.0L107.0 309.0ZM76.0 320.0L85.0 318.0L97.0 322.0L105.0 330.0L110.0 339.0L112.0 348.0L111.0 358.0L106.0 367.0L100.0 372.0L86.0 373.0L79.0 370.0L71.0 363.0L65.0 353.0L64.0 336.0L68.0 327.0Z", y0: 305, y1: 387 },
+    t:      { d: "M158.0 41.0L155.0 41.0L151.0 45.0L148.0 61.0L148.0 81.0L147.0 82.0L147.0 208.0L148.0 209.0L147.0 216.0L148.0 217.0L148.0 234.0L146.0 238.0L141.0 241.0L110.0 240.0L109.0 239.0L101.0 240.0L94.0 245.0L92.0 250.0L93.0 257.0L104.0 257.0L105.0 256.0L123.0 255.0L124.0 254.0L142.0 254.0L146.0 255.0L148.0 258.0L148.0 296.0L149.0 297.0L148.0 299.0L149.0 301.0L149.0 306.0L148.0 307.0L149.0 310.0L148.0 311.0L149.0 312.0L149.0 468.0L148.0 469.0L148.0 561.0L147.0 562.0L147.0 642.0L146.0 643.0L146.0 658.0L147.0 659.0L146.0 660.0L147.0 661.0L148.0 684.0L151.0 688.0L156.0 688.0L160.0 685.0L163.0 675.0L163.0 660.0L162.0 659.0L163.0 657.0L162.0 483.0L161.0 482.0L162.0 480.0L161.0 479.0L161.0 302.0L162.0 301.0L162.0 258.0L167.0 254.0L230.0 255.0L238.0 252.0L243.0 246.0L243.0 239.0L239.0 237.0L207.0 239.0L206.0 240.0L166.0 240.0L162.0 236.0L162.0 70.0L161.0 69.0L161.0 45.0Z", y0: 41,  y1: 688 },
+    accent: { d: "M209.0 176.0L207.0 175.0L204.0 176.0L199.0 181.0L187.0 198.0L184.0 205.0L187.0 210.0L205.0 208.0L217.0 205.0L220.0 203.0L219.0 199.0L217.0 198.0L210.0 198.0L198.0 201.0L197.0 200.0L209.0 184.0L211.0 179.0Z", y0: 175, y1: 210 },
+    i:      { d: "M199.0 310.0L194.0 310.0L190.0 312.0L186.0 319.0L187.0 334.0L188.0 335.0L188.0 379.0L187.0 380.0L188.0 382.0L187.0 383.0L188.0 392.0L191.0 395.0L194.0 396.0L199.0 395.0L204.0 389.0L203.0 353.0L202.0 352.0L203.0 322.0L202.0 321.0L202.0 314.0Z", y0: 310, y1: 396 },
+    u:      { d: "M281.0 308.0L278.0 308.0L274.0 310.0L271.0 313.0L269.0 318.0L270.0 326.0L275.0 341.0L276.0 360.0L273.0 371.0L270.0 377.0L263.0 383.0L254.0 383.0L249.0 381.0L243.0 376.0L238.0 367.0L237.0 353.0L243.0 328.0L243.0 322.0L241.0 318.0L238.0 316.0L232.0 316.0L226.0 319.0L222.0 323.0L221.0 326.0L223.0 329.0L228.0 328.0L232.0 329.0L232.0 337.0L226.0 361.0L226.0 376.0L231.0 387.0L236.0 392.0L242.0 395.0L259.0 396.0L271.0 391.0L282.0 381.0L287.0 372.0L291.0 359.0L292.0 340.0L287.0 316.0L284.0 310.0Z", y0: 308, y1: 396 },
+    s:      { d: "M351.0 278.0L336.0 279.0L324.0 285.0L315.0 294.0L309.0 308.0L309.0 323.0L311.0 330.0L322.0 349.0L344.0 378.0L353.0 395.0L356.0 405.0L356.0 420.0L351.0 430.0L348.0 433.0L342.0 436.0L329.0 436.0L318.0 431.0L313.0 426.0L308.0 416.0L309.0 406.0L311.0 402.0L317.0 396.0L317.0 394.0L314.0 392.0L310.0 393.0L300.0 401.0L294.0 413.0L293.0 418.0L294.0 429.0L298.0 437.0L307.0 445.0L317.0 449.0L324.0 449.0L325.0 450.0L335.0 449.0L350.0 443.0L357.0 438.0L364.0 430.0L368.0 423.0L371.0 414.0L371.0 408.0L372.0 407.0L371.0 396.0L365.0 379.0L353.0 360.0L330.0 329.0L325.0 320.0L323.0 313.0L323.0 304.0L325.0 298.0L331.0 292.0L336.0 290.0L346.0 291.0L350.0 293.0L357.0 301.0L356.0 315.0L360.0 316.0L366.0 311.0L370.0 302.0L369.0 290.0L362.0 282.0Z", y0: 278, y1: 450 },
+  } as Record<string, { d: string; y0: number; y1: number }>,
+  stem:  { x: 138, w: 34, y: 41, h: 647 },
+  cross: { y: 229, h: 34, cx: 155, reach: 300 },
+};
+
+// Timing windows: each letter wipes in during this fraction of the total progress
+const WINDOWS: Record<string, [number, number]> = {
+  cross:  [0,    0.14],
+  l:      [0.10, 0.30],
+  o:      [0.22, 0.42],
+  u:      [0.36, 0.56],
+  s:      [0.50, 0.72],
+  i:      [0.66, 0.84],
+  accent: [0.80, 1.00],
+};
+
+const LETTERS = ["l", "o", "u", "s", "i", "accent"] as const;
+const NS = "http://www.w3.org/2000/svg";
+
+// ─── Easing helpers ──────────────────────────────────────────────────────────
+const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+const eIO   = (t: number) => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
+const lf    = (q: number, s: number, e: number) => clamp((q-s)/(e-s), 0, 1);
 
 interface LoadingScreenProps {
   fadeOut: boolean;
@@ -18,88 +50,283 @@ export default function LoadingScreen({ fadeOut }: LoadingScreenProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  const pctRef  = useRef<HTMLSpanElement>(null);
-  const startRef = useRef<number | null>(null);
+  const svgRef   = useRef<SVGSVGElement>(null);
+  const numRef   = useRef<HTMLSpanElement>(null);
+  const fillRef  = useRef<HTMLDivElement>(null);
   const rafRef   = useRef<number | null>(null);
-  const DURATION = 5500;
+  const initRef  = useRef(false);
 
-  const ease = (t: number) =>
-    t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  // Colours derived from theme
+  const paper = isDark ? "#15120C" : "#F2EEE4";
+  const ink   = isDark ? "#F2EEE4" : "#15120C";
+  const muted = isDark ? "#7A7060" : "#A89E89";
 
+  // ── Build SVG DOM once on mount ──────────────────────────────────────────
   useEffect(() => {
-    startRef.current = null;
+    const svgEl = svgRef.current;
+    if (!svgEl || initRef.current) return;
+    initRef.current = true;
 
-    const tick = (now: number) => {
-      if (startRef.current === null) startRef.current = now;
-      const t = Math.min((now - startRef.current) / DURATION, 1);
-      const v = ease(t);
-      const dark = document.documentElement.classList.contains("dark");
+    const { vb, glyphs, stem, cross } = LOGO;
+    svgEl.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
 
-      if (pctRef.current) {
-        pctRef.current.textContent = Math.round(v * 100) + "%";
-        pctRef.current.style.color = dark
-          ? "rgba(255,255,255,0.4)"
-          : "rgba(0,0,0,0.28)";
-      }
+    // defs + clip paths
+    const defs = document.createElementNS(NS, "defs");
+    svgEl.appendChild(defs);
 
-      if (t < 1) rafRef.current = requestAnimationFrame(tick);
+    const rects: Record<string, SVGRectElement> = {};
+
+    const mkClip = (id: string) => {
+      const cp = document.createElementNS(NS, "clipPath");
+      cp.setAttribute("id", id);
+      cp.setAttribute("clipPathUnits", "userSpaceOnUse");
+      defs.appendChild(cp);
+      return cp;
     };
 
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    rafRef.current = requestAnimationFrame(tick);
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [isDark]);
+    // Per-letter clip rects (wipe top-down)
+    LETTERS.forEach(n => {
+      const cp = mkClip("cp-" + n);
+      const r  = document.createElementNS(NS, "rect");
+      r.setAttribute("x", "-60");
+      r.setAttribute("width", "560");
+      r.setAttribute("y",  String(glyphs[n].y0 - 6));
+      r.setAttribute("height", "0");
+      cp.appendChild(r);
+      rects[n] = r;
+    });
+
+    // t clip = full stem (always visible) + growing crossbar
+    const cpt    = mkClip("cp-t");
+    const rStem  = document.createElementNS(NS, "rect");
+    rStem.setAttribute("x",      String(stem.x));
+    rStem.setAttribute("width",  String(stem.w));
+    rStem.setAttribute("y",      String(stem.y));
+    rStem.setAttribute("height", String(stem.h));
+
+    const rCross = document.createElementNS(NS, "rect");
+    rCross.setAttribute("y",      String(cross.y));
+    rCross.setAttribute("height", String(cross.h));
+    rCross.setAttribute("x",      String(cross.cx));
+    rCross.setAttribute("width",  "0");
+    cpt.appendChild(rStem);
+    cpt.appendChild(rCross);
+
+    // Render paths
+    const mkPath = (n: string) => {
+      const p = document.createElementNS(NS, "path");
+      p.setAttribute("fill", ink);
+      p.setAttribute("d", glyphs[n].d);
+      p.setAttribute("clip-path", `url(#cp-${n})`);
+      svgEl.appendChild(p);
+    };
+    ["l", "o", "t", "u", "s", "i", "accent"].forEach(mkPath);
+
+    // ── Animation loop ───────────────────────────────────────────────────
+    const T = { form: 3200, holdFull: 850, unform: 2800, holdBase: 420 };
+    type Phase = "form" | "holdFull" | "unform" | "holdBase";
+    let phase: Phase = "form";
+    let t0 = performance.now();
+
+    const drawForm = (q: number) => {
+      // Crossbar grows from centre outward
+      const fc = eIO(lf(q, WINDOWS.cross[0], WINDOWS.cross[1]));
+      const w  = fc * cross.reach;
+      rCross.setAttribute("width", String(w));
+      rCross.setAttribute("x",     String(cross.cx - w / 2));
+
+      // Letters wipe in top-down
+      LETTERS.forEach(n => {
+        const g = LOGO.glyphs[n];
+        const f = eIO(lf(q, WINDOWS[n][0], WINDOWS[n][1]));
+        rects[n].setAttribute("y",      String(g.y0 - 6));
+        rects[n].setAttribute("height", String(f * (g.y1 - g.y0 + 12)));
+      });
+
+      if (numRef.current)  numRef.current.textContent  = String(Math.round(q * 100)).padStart(2, "0");
+      if (fillRef.current) fillRef.current.style.transform = `scaleX(${q})`;
+    };
+
+    const loop = (now: number) => {
+      const el = now - t0;
+      let q: number;
+      if (phase === "form") {
+        q = clamp(el / T.form, 0, 1);
+        if (el >= T.form) { phase = "holdFull"; t0 = now; q = 1; }
+      } else if (phase === "holdFull") {
+        q = 1;
+        if (el >= T.holdFull) { phase = "unform"; t0 = now; }
+      } else if (phase === "unform") {
+        q = 1 - clamp(el / T.unform, 0, 1);
+        if (el >= T.unform) { phase = "holdBase"; t0 = now; q = 0; }
+      } else {
+        q = 0;
+        if (el >= T.holdBase) { phase = "form"; t0 = now; }
+      }
+      drawForm(q);
+      rafRef.current = requestAnimationFrame(loop);
+    };
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      drawForm(1);
+    } else {
+      drawForm(0);
+      rafRef.current = requestAnimationFrame(loop);
+    }
+
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Update SVG path fill colours when theme changes
+  useEffect(() => {
+    const svgEl = svgRef.current;
+    if (!svgEl) return;
+    svgEl.querySelectorAll("path").forEach(p => p.setAttribute("fill", ink));
+  }, [ink]);
 
   return (
     <div
       className={`loading-screen${fadeOut ? " fade-out" : ""}`}
       aria-label="Lotius loading screen"
       style={{
-        background: isDark ? "oklch(0.08 0 0)" : "#fff",
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        background: paper,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "hidden",
         transition: "background 450ms cubic-bezier(0.23,1,0.32,1)",
+        fontFamily: "'Jura', ui-sans-serif, system-ui, sans-serif",
       }}
     >
-      {/* Hand-drawn logo — inline SVG, switches black/white with theme */}
+      {/* Grain texture overlay */}
       <svg
-        viewBox="0 0 391 708"
-        aria-label="lotius"
-        style={{
-          width: "clamp(180px, 38vw, 340px)",
-          height: "auto",
-          display: "block",
-          fill: isDark ? "white" : "black",
-          transition: "fill 450ms cubic-bezier(0.23,1,0.32,1)",
-          animation: "logoBreath 3s ease-in-out infinite",
-          willChange: "transform, opacity",
-        }}
+        style={{ position: "fixed", inset: 0, pointerEvents: "none", opacity: 0.045, mixBlendMode: "multiply", zIndex: 5 }}
+        aria-hidden="true"
       >
-        <path fillRule="evenodd" d={LOGO_PATH} />
+        <filter id="gr-loader">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves={2} stitchTiles="stitch" />
+          <feColorMatrix type="saturate" values="0" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#gr-loader)" />
       </svg>
 
-      {/* Progress counter */}
-      <span
-        ref={pctRef}
+      {/* Stage */}
+      <div
         style={{
-          marginTop: "2.5rem",
-          fontFamily: "'Bodoni Moda', serif",
-          fontWeight: 400,
-          fontSize: "11px",
-          letterSpacing: "0.42em",
-          textTransform: "uppercase",
-          color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.28)",
-          transition: "color 300ms cubic-bezier(0.23,1,0.32,1)",
+          position: "relative",
+          width: "min(86vw, 420px)",
+          height: "min(80vh, 720px)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        0%
-      </span>
+        {/* Crop marks */}
+        {(["tl","tr","bl","br"] as const).map(pos => (
+          <span
+            key={pos}
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              width: 16,
+              height: 16,
+              pointerEvents: "none",
+              zIndex: 2,
+              ...(pos === "tl" ? { top: 0, left: 0 } :
+                  pos === "tr" ? { top: 0, right: 0, transform: "scaleX(-1)" } :
+                  pos === "bl" ? { bottom: 0, left: 0, transform: "scaleY(-1)" } :
+                               { bottom: 0, right: 0, transform: "scale(-1,-1)" }),
+            }}
+          >
+            {/* horizontal arm */}
+            <span style={{ position: "absolute", width: "100%", height: 1, top: 0, left: 0, background: ink, opacity: 0.28 }} />
+            {/* vertical arm */}
+            <span style={{ position: "absolute", width: 1, height: "100%", top: 0, left: 0, background: ink, opacity: 0.28 }} />
+          </span>
+        ))}
 
-      <style>{`
-        @keyframes logoBreath {
-          0%   { transform: scale(1);       opacity: 0.88; }
-          50%  { transform: scale(1.018);   opacity: 1;    }
-          100% { transform: scale(1);       opacity: 0.88; }
-        }
-      `}</style>
+        {/* Percentage counter */}
+        <div
+          style={{
+            position: "absolute",
+            top: -2,
+            right: 0,
+            display: "flex",
+            alignItems: "baseline",
+            gap: "0.2em",
+            fontWeight: 300,
+            letterSpacing: "0.05em",
+            fontVariantNumeric: "tabular-nums",
+          }}
+        >
+          <span ref={numRef} style={{ fontSize: 14, color: ink, transition: "color 450ms" }}>00</span>
+          <span style={{ fontSize: 9, color: muted, transition: "color 450ms" }}>%</span>
+        </div>
+
+        {/* Logo SVG */}
+        <div style={{ flex: 1, minHeight: 0, display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
+          <svg
+            ref={svgRef}
+            aria-label="LOTIUS loading"
+            style={{ height: "100%", maxHeight: 560, width: "auto", overflow: "visible", display: "block" }}
+          />
+        </div>
+
+        {/* Progress bar */}
+        <div
+          style={{
+            width: "min(240px, 68%)",
+            margin: "34px 0 10px",
+            display: "flex",
+            alignItems: "center",
+            gap: 14,
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              height: 2,
+              borderRadius: 2,
+              position: "relative",
+              overflow: "hidden",
+              background: isDark ? "rgba(242,238,228,0.13)" : "rgba(21,18,12,0.13)",
+              transition: "background 450ms",
+            }}
+          >
+            <div
+              ref={fillRef}
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: ink,
+                borderRadius: 2,
+                transformOrigin: "left center",
+                transform: "scaleX(0)",
+                transition: "background 450ms",
+              }}
+            />
+          </div>
+          <span
+            style={{
+              fontSize: 9,
+              letterSpacing: "0.4em",
+              textTransform: "uppercase",
+              color: muted,
+              transition: "color 450ms",
+            }}
+          >
+            LOTIUS
+          </span>
+        </div>
+      </div>
     </div>
   );
 }

@@ -351,20 +351,13 @@ html.theme-transitioning *::after {
     transform: translateX(0);
   }
 
-  /* Loading screen */
+    /* Loading screen */
   .loading-screen {
     position: fixed;
     inset: 0;
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 22px;
     z-index: 9999;
     transition: opacity 600ms var(--ease-luxury);
   }
-
   .loading-screen.fade-out {
     opacity: 0;
     pointer-events: none;
