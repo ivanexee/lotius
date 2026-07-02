@@ -895,7 +895,7 @@ export default function Home() {
       <SectionCurtain color="oklch(0.08 0 0)" />
 
       {/* About Me */}
-      <section id="about" data-section="about" style={{ padding: "8rem 0", background: isDark ? "oklch(0.13 0.012 60)" : "#f5ede0", borderTop: `0.5px solid ${isDark ? "rgba(255,220,170,0.1)" : "rgba(160,120,70,0.12)"}`, transition: "background 450ms cubic-bezier(0.23,1,0.32,1), border-color 450ms cubic-bezier(0.23,1,0.32,1)" }}>
+      <section data-section="about" style={{ padding: "8rem 0", background: isDark ? "oklch(0.13 0.012 60)" : "#f5ede0", borderTop: `0.5px solid ${isDark ? "rgba(255,220,170,0.1)" : "rgba(160,120,70,0.12)"}`, transition: "background 450ms cubic-bezier(0.23,1,0.32,1), border-color 450ms cubic-bezier(0.23,1,0.32,1)" }}>
         <RevealSection>
           <div style={{ maxWidth: 700, margin: "0 auto", padding: "0 2rem", textAlign: "center" }}>
             <span className="label-caps" style={{ opacity: 0.4, display: "block", marginBottom: "2rem" }}>
