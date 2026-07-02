@@ -505,3 +505,27 @@ html {
               color 450ms cubic-bezier(0.23, 1, 0.32, 1),
               border-color 450ms cubic-bezier(0.23, 1, 0.32, 1) !important;
 }
+
+/* ============================================================
+   /archive — ARCHIVE/DROP scroll experience
+   Backgrounds pinned to true #000/#fff (not bone) so the
+   exclusion-blend overlay UI stays legible.
+   ============================================================ */
+.bp-card {
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bp-card {
+    will-change: auto;
+  }
+}
+
+/* archive route locks dark chrome for the scrub/exclusion effect */
+.archive-root {
+  background: #fff;
+}
+
+.archive-panel {
+  background: #000;
+}

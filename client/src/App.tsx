@@ -7,6 +7,7 @@ import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { TranslationPrompt } from "./components/TranslationPrompt";
 import Home from "./pages/Home";
+import Archive from "./pages/Archive";
 import Discover from "./pages/Discover";
 import Laureates from "./pages/Laureates";
 import Council from "./pages/Council";
@@ -28,6 +29,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/archive" component={Archive} />
       <Route path="/discover" component={Discover} />
       <Route path="/laureates" component={Laureates} />
       <Route path="/council" component={Council} />
