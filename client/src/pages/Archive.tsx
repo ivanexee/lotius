@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "wouter";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -75,6 +75,7 @@ export default function Archive() {
   const [cols, setCols] = useState(() => getCols(window.innerWidth));
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
   const [mediaLoaded, setMediaLoaded] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const isDesktop = useMemo(
     () => window.matchMedia("(min-width: 1024px) and (pointer: fine)").matches,
@@ -129,6 +130,28 @@ export default function Archive() {
       window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     };
   }, []);
+
+  /* ── Menu overlay: scroll lock + Escape ── */
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
+
+  const goToAbout = useCallback(() => {
+    setMenuOpen(false);
+    navigate("/");
+    // Home mounts on the client route change; scroll once its sections exist
+    setTimeout(() => {
+      document.getElementById("about")?.scrollIntoView({ behavior: "smooth" });
+    }, 450);
+  }, [navigate]);
 
   /* ── Resize: columns, mobile flag ── */
   useEffect(() => {
@@ -434,6 +457,7 @@ export default function Archive() {
       <div
         ref={canvasRef}
         id="main-canvas"
+        className={isMobile ? "archive-canvas-mobile" : undefined}
         style={{
           position: "fixed",
           zIndex: 0,
@@ -443,7 +467,7 @@ export default function Archive() {
           transition: "opacity 0.3s ease",
           background: "#000",
           ...(isMobile
-            ? { left: 0, top: 220, width: "100vw", height: "calc(100vh - 220px)" }
+            ? { left: 0, top: 220, width: "100vw" }
             : { inset: 0, width: "100%", height: "100%" }),
         }}
       >
@@ -456,7 +480,7 @@ export default function Archive() {
               playsInline
               preload="auto"
               onLoadedData={handleMediaLoad}
-              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "none" }}
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 15%", display: "none" }}
             />
             <video
               ref={videoBRef}
@@ -465,18 +489,19 @@ export default function Archive() {
               playsInline
               preload="auto"
               onLoadedData={handleMediaLoad}
-              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 15%", display: "block" }}
             />
           </>
         ) : (
           <>
-            {/* look A — base layer (right of the split) */}
+            {/* look A — base layer (right of the split); position keeps faces
+               in frame when landscape viewports crop the portrait shot */}
             <img
               src={HERO_MEDIA.a}
               alt="Archive 001 — look A"
               draggable={false}
               onLoad={handleMediaLoad}
-              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 15%" }}
             />
             {/* look B — clipped layer, revealed from the left as the split moves */}
             <div
@@ -488,7 +513,7 @@ export default function Archive() {
                 alt="Archive 001 — look B"
                 draggable={false}
                 onLoad={handleMediaLoad}
-                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 15%" }}
               />
             </div>
             <div
@@ -593,25 +618,14 @@ export default function Archive() {
           maxWidth: isMobile ? "calc(100vw - 32px)" : "min(692px, calc(50vw - 48px))",
         }}
       >
-        <motion.div {...entrance(0)} style={{ display: "flex", alignItems: "flex-end", gap: "0.6em" }}>
+        <motion.div {...entrance(0)}>
           <svg
             viewBox="0 0 391 708"
             aria-label="lotius"
-            style={{ height: isMobile ? 44 : "clamp(56px, 6.5vw, 92px)", width: "auto", fill: "#fff", display: "block" }}
+            style={{ height: isMobile ? 72 : "clamp(88px, 9vw, 136px)", width: "auto", fill: "#fff", display: "block" }}
           >
             <path fillRule="evenodd" d={LOGO_PATH} />
           </svg>
-          <span
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 400,
-              fontSize: isMobile ? 34 : "clamp(44px, 5.5vw, 80px)",
-              letterSpacing: "-0.02em",
-              lineHeight: 0.85,
-            }}
-          >
-            LOTIUS
-          </span>
         </motion.div>
         <motion.p
           {...entrance(0.3)}
@@ -628,15 +642,15 @@ export default function Archive() {
         </motion.p>
       </div>
 
-      {/* header nav (top-right) */}
+      {/* header nav (top-right) — interactive, above the menu overlay */}
       <motion.div
         {...entrance(0.15)}
         style={{
           position: "fixed",
           top: inset,
           right: inset,
-          zIndex: 20,
-          pointerEvents: "none",
+          zIndex: 40,
+          pointerEvents: "auto",
           mixBlendMode: "exclusion",
           color: "#fff",
           display: "flex",
@@ -647,18 +661,127 @@ export default function Archive() {
         }}
       >
         {!isMobile && (
-          <span style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: 15, textTransform: "uppercase" }}>
+          <button
+            onClick={goToAbout}
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 400,
+              fontSize: 15,
+              textTransform: "uppercase",
+              background: "none",
+              border: "none",
+              color: "inherit",
+              padding: 0,
+              cursor: hideCursor ? "none" : "pointer",
+            }}
+          >
             ABOUT
-          </span>
+          </button>
         )}
-        <svg width={isMobile ? 24 : 30} height={isMobile ? 24 : 30} viewBox="0 0 40 40" aria-hidden="true">
-          <path d="M0 14H40" stroke="#fff" strokeWidth="2.5" />
-          <path d="M0 26H40" stroke="#fff" strokeWidth="2.5" />
-        </svg>
+        <button
+          className={`menu-toggle${menuOpen ? " opened" : ""}`}
+          onClick={() => setMenuOpen((v) => !v)}
+          aria-label="Main Menu"
+          aria-expanded={menuOpen}
+          style={{ color: "inherit", cursor: hideCursor ? "none" : "pointer" }}
+        >
+          <svg width={isMobile ? 38 : 46} height={isMobile ? 38 : 46} viewBox="0 0 100 100">
+            <path
+              className="line line1"
+              d="M 20,29.000046 H 80.000231 C 80.000231,29.000046 94.498839,28.817352 94.532987,66.711331 94.543142,77.980673 90.966081,81.670246 85.259173,81.668997 79.552261,81.667751 75.000211,74.999942 75.000211,74.999942 L 25.000021,25.000058"
+            />
+            <path className="line line2" d="M 20,50 H 80" />
+            <path
+              className="line line3"
+              d="M 20,70.999954 H 80.000231 C 80.000231,70.999954 94.498839,71.182648 94.532987,33.288669 94.543142,22.019327 90.966081,18.329754 85.259173,18.331003 79.552261,18.332249 75.000211,25.000058 75.000211,25.000058 L 25.000021,74.999942"
+            />
+          </svg>
+        </button>
         <span style={{ fontFamily: "var(--font-display)", fontWeight: 400, fontSize: isMobile ? 13 : 15 }}>
           [ CART ]
         </span>
       </motion.div>
+
+      {/* menu overlay — under the nav so the hamburger morphs into the close X */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.nav
+            key="archive-menu"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: ENTRANCE_EASE }}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "#000",
+              zIndex: 30,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              padding: "0 clamp(24px, 8vw, 120px)",
+            }}
+          >
+            {[
+              { label: "HOME", go: () => navigate("/") },
+              { label: "ABOUT", go: goToAbout },
+              { label: "DISCOVER THE AWARD", go: () => navigate("/discover") },
+              { label: "LAUREATES", go: () => navigate("/laureates") },
+              { label: "COUNCIL", go: () => navigate("/council") },
+              { label: "MENTORS", go: () => navigate("/mentors") },
+            ].map((item, i) => (
+              <motion.button
+                key={item.label}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 12 }}
+                transition={{ duration: 0.5, ease: ENTRANCE_EASE, delay: 0.08 * i + 0.1 }}
+                onClick={() => {
+                  setMenuOpen(false);
+                  item.go();
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.5")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+                style={{
+                  textAlign: "left",
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  color: "#fff",
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 400,
+                  fontSize: "clamp(30px, 5vw, 58px)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.02em",
+                  lineHeight: 1.55,
+                  cursor: hideCursor ? "none" : "pointer",
+                  transition: "opacity 250ms var(--ease-luxury)",
+                }}
+              >
+                {item.label}
+              </motion.button>
+            ))}
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.4 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              style={{
+                position: "absolute",
+                bottom: inset,
+                left: "clamp(24px, 8vw, 120px)",
+                color: "#fff",
+                fontFamily: "var(--font-display)",
+                fontSize: 11,
+                letterSpacing: "0.35em",
+                textTransform: "uppercase",
+              }}
+            >
+              ARCHIVE 001 — LOTIUS 2026
+            </motion.span>
+          </motion.nav>
+        )}
+      </AnimatePresence>
 
       {/* drop info (bottom-right) — RAF slides the outer div up during outro */}
       <div
